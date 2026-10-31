@@ -83,7 +83,20 @@ function Reader({
   const rowY = useRef(new Map<number, number>());
   const focusKey = focus.join(',');
   const [focused, setFocused] = useState<ReadonlySet<number>>(new Set(focus));
-  const pendingScroll = useRef<number | null>(focus[0] ?? null);
+  const pendingScroll = useRef<number | null>(null);
+  const pendingUntil = useRef(0);
+
+  // Reset scroll bookkeeping during render (not in an effect) whenever the chapter or the
+  // target verse changes, so layout events that arrive early aren't thrown away.
+  const scrollKey = `${version}/${book}/${chapter}?${focusKey}`;
+  const lastScrollKey = useRef<string | null>(null);
+  if (lastScrollKey.current !== scrollKey) {
+    lastScrollKey.current = scrollKey;
+    rowY.current = new Map();
+    textTop.current = 0;
+    pendingScroll.current = focus[0] ?? null;
+    pendingUntil.current = 0;
+  }
 
   const prev = prevChapter({ book, chapter });
   const next = nextChapter({ book, chapter });
@@ -91,32 +104,46 @@ function Reader({
   useEffect(() => {
     saveLastPosition({ version, book, chapter });
     setSelected(new Set()); // new chapter or version → start with nothing selected
-    rowY.current = new Map();
   }, [version, book, chapter]);
 
   // Opened from a bookmark: mark those verses for a few seconds and scroll to the first.
   useEffect(() => {
     const verses = focusKey ? focusKey.split(',').map(Number) : [];
     setFocused(new Set(verses));
-    pendingScroll.current = verses[0] ?? null;
     if (!verses.length) return;
     const t = setTimeout(() => setFocused(new Set()), 4000);
     return () => clearTimeout(t);
   }, [focusKey, book, chapter]);
 
+  /**
+   * Scroll to the bookmarked verse once its position is known. The first attempts can land
+   * before the page has its full height (the scroll gets clamped to the top), so keep
+   * re-applying it on every layout/size change for a short window, then stop so the
+   * reader can scroll freely.
+   */
   const tryScroll = useCallback(() => {
     const target = pendingScroll.current;
     if (target == null) return;
     const y = rowY.current.get(target);
-    if (y == null) return;
+    if (y == null || !textTop.current) return;
+    const now = Date.now();
+    if (!pendingUntil.current) pendingUntil.current = now + 1500;
+    if (now > pendingUntil.current) {
+      pendingScroll.current = null;
+      return;
+    }
+    const top = Math.max(0, textTop.current + y - Spacing.four);
+    scrollRef.current?.scrollTo({ y: top, animated: false });
+    requestAnimationFrame(() => scrollRef.current?.scrollTo({ y: top, animated: false }));
+  }, []);
+  const stopAutoScroll = useCallback(() => {
     pendingScroll.current = null;
-    scrollRef.current?.scrollTo({ y: Math.max(0, textTop.current + y - Spacing.four), animated: false });
   }, []);
 
   const onVerseLayout = useCallback(
     (verse: number, y: number) => {
       rowY.current.set(verse, y);
-      if (verse === pendingScroll.current) tryScroll();
+      if (pendingScroll.current != null) tryScroll();
     },
     [tryScroll],
   );
@@ -273,6 +300,8 @@ function Reader({
       {/* Chapter */}
       <ScrollView
         ref={scrollRef}
+        onContentSizeChange={tryScroll}
+        onScrollBeginDrag={stopAutoScroll}
         key={`${version}/${book}/${chapter}`}
         contentContainerStyle={[styles.scroll, selected.size > 0 && styles.scrollWithBar]}>
         <View style={styles.column}>
