@@ -1,9 +1,13 @@
+<p align="center">
+  <img src="assets/images/berean_logo_500x500.png" alt="Berean logo" width="180" />
+</p>
+
 # Berean
 
 Bible Study App — read and compare Bible versions, highlight, bookmark and take notes.
 Everything is stored on your device; no account needed.
 
-**Test web app:** https://berean.michaelbarnes0.workers.dev
+**Test web app:** [berean.michaelbarnes0.workers.dev](https://berean.michaelbarnes0.workers.dev)
 
 Built with [Expo](https://expo.dev) (React Native + Expo Router) for iOS, Android and web.
 
