@@ -8,14 +8,16 @@
     "scheme": "berean",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.quinosoyez.berean"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#011D57",
         "foregroundImage": "./assets/images/adaptive-icon.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.quinosoyez.berean"
     },
     "web": {
       "output": "single",
@@ -39,6 +41,16 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "8d7fb6bd-26ab-4691-9b0c-15b6708af939"
+      }
     }
   }
 }
