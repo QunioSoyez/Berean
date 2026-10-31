@@ -26,13 +26,17 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Hamburger menu (top right): Bible version, Search, Bookmarks, Settings, About & credits, License
 - [x] About & credits page (Bible text sources, privacy) and License page (MIT)
 - [x] Placeholder "coming soon" pages for Bookmarks, Search, Settings
+- [x] Android preview build (EAS) tested on device
+- [x] Web test deploy on Cloudflare (auto-deploys on push): https://berean.michaelbarnes0.workers.dev
 
 ## Round 2 — Verse selection & highlighting
-- [ ] Tap verse(s) to select; action bar appears *(PRD)*
-- [ ] Highlight in a few colors; remove highlight *(added)*
-- [ ] Copy / share selected verses with reference
-- [ ] Local database for user data (SQLite on phones; web storage decision made here)
-- [ ] Highlights stay attached to the verse across all versions
+- [x] Tap verse(s) to select; action bar appears *(PRD)*
+- [x] Highlight in 5 colors (yellow, green, blue, pink, orange); remove highlight *(added)*
+- [x] Copy / share selected verses with reference (one verse per line, superscript numbers)
+- [x] Local storage for user data: SQLite on phones, browser storage on web
+- [x] Highlights attach to the verse, so they show in every version
+- [x] iPhone "Add to Home Screen" icon for the web app
+- [x] Web: Esc clears the selection
 
 ## Round 3 — Bookmarks
 - [ ] Add / remove bookmark on a verse or chapter *(PRD)*
@@ -70,7 +74,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] Graceful handling of local save failures *(PRD)*
 
 ## Round 9 — Launch
-- [ ] Web deploy to Cloudflare Pages
+- [ ] Production web deploy (custom domain?)
 - [ ] EAS builds; App Store and Google Play listings
 - [ ] Privacy policy page (no data collected)
 

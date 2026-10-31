@@ -1,19 +1,24 @@
+import * as Clipboard from 'expo-clipboard';
 import { Image } from 'expo-image';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getBook, nextChapter, prevChapter, type ChapterRef } from '@/bible/books';
+import { formatPassageForSharing, formatReference } from '@/bible/reference';
 import { useChapter } from '@/bible/use-chapter';
 import { getVersion } from '@/bible/versions';
 import { AppMenu } from '@/components/app-menu';
 import { BookPicker } from '@/components/book-picker';
 import { ChapterText } from '@/components/chapter-text';
+import { SelectionBar } from '@/components/selection-bar';
 import { VersionPicker } from '@/components/version-picker';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { goHome } from '@/navigation';
+import { shareText } from '@/share-text';
 import { saveLastPosition } from '@/state/last-position';
+import { useHighlights } from '@/userdata/use-highlights';
 
 type Params = { version: string; book: string; chapter: string };
 
@@ -37,13 +42,78 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
   const state = useChapter(version, book, chapter);
   const [bookPickerOpen, setBookPickerOpen] = useState(false);
   const [versionPickerOpen, setVersionPickerOpen] = useState(false);
+  const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
+  const [message, setMessage] = useState<string | null>(null);
+  const messageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hl = useHighlights(book, chapter);
 
   const prev = prevChapter({ book, chapter });
   const next = nextChapter({ book, chapter });
 
   useEffect(() => {
     saveLastPosition({ version, book, chapter });
+    setSelected(new Set()); // new chapter or version → start with nothing selected
   }, [version, book, chapter]);
+
+  // Short status line in the selection bar ("Copied", errors), cleared after a moment.
+  const flash = useCallback((text: string) => {
+    setMessage(text);
+    if (messageTimer.current) clearTimeout(messageTimer.current);
+    messageTimer.current = setTimeout(() => setMessage(null), 2500);
+  }, []);
+  useEffect(() => {
+    if (hl.error) flash(hl.error);
+  }, [hl.error, flash]);
+
+  const toggleVerse = useCallback((verse: number) => {
+    setSelected((prevSel) => {
+      const next = new Set(prevSel);
+      if (next.has(verse)) next.delete(verse);
+      else next.add(verse);
+      return next;
+    });
+  }, []);
+  const clearSelection = useCallback(() => setSelected(new Set()), []);
+
+  const selectedVerses = useMemo(() => [...selected].sort((a, b) => a - b), [selected]);
+  const selectedColors = new Set(selectedVerses.map((v) => hl.highlights.get(v) ?? null));
+  const currentColor = selectedColors.size === 1 ? [...selectedColors][0] : null;
+  const anyHighlighted = selectedVerses.some((v) => hl.highlights.has(v));
+
+  const passageText = () =>
+    state.status === 'ready'
+      ? formatPassageForSharing(
+          book,
+          chapter,
+          selectedVerses.map((v) => ({ verse: v, text: state.verses[v - 1] ?? '' })),
+          versionInfo.abbr,
+        )
+      : '';
+
+  const onHighlight = (color: string) => {
+    hl.highlight(selectedVerses, color);
+    clearSelection();
+  };
+  const onRemoveHighlight = () => {
+    hl.unhighlight(selectedVerses);
+    clearSelection();
+  };
+  const onCopy = async () => {
+    try {
+      await Clipboard.setStringAsync(passageText());
+      flash('Copied');
+    } catch {
+      flash('Couldn’t copy. Please try again.');
+    }
+  };
+  const onShare = async () => {
+    try {
+      const result = await shareText(passageText());
+      if (result === 'copied') flash('Copied — paste it anywhere to share');
+    } catch {
+      flash('Couldn’t share. Please try again.');
+    }
+  };
 
   const go = useCallback(
     (to: { version?: string } & Partial<ChapterRef>) => {
@@ -66,12 +136,13 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
       const target = e.target as HTMLElement | null;
       if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') return;
       if (bookPickerOpen || versionPickerOpen) return;
+      if (e.key === 'Escape') clearSelection();
       if (e.key === 'ArrowLeft' && prev) go(prev);
       if (e.key === 'ArrowRight' && next) go(next);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [go, prev, next, bookPickerOpen, versionPickerOpen]);
+  }, [go, prev, next, bookPickerOpen, versionPickerOpen, clearSelection]);
 
   const title = `${bookInfo.name} ${chapter}`;
 
@@ -111,7 +182,9 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
       </View>
 
       {/* Chapter */}
-      <ScrollView key={`${version}/${book}/${chapter}`} contentContainerStyle={styles.scroll}>
+      <ScrollView
+        key={`${version}/${book}/${chapter}`}
+        contentContainerStyle={[styles.scroll, selected.size > 0 && styles.scrollWithBar]}>
         <View style={styles.column}>
           <Text style={styles.chapterHeading} accessibilityRole="header">
             {title}
@@ -128,7 +201,14 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
               </Pressable>
             </View>
           )}
-          {state.status === 'ready' && <ChapterText verses={state.verses} />}
+          {state.status === 'ready' && (
+            <ChapterText
+              verses={state.verses}
+              highlights={hl.highlights}
+              selected={selected}
+              onToggleVerse={toggleVerse}
+            />
+          )}
 
           {/* Previous / next */}
           <View style={styles.nav}>
@@ -141,6 +221,25 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
           </Text>
         </View>
       </ScrollView>
+
+      {selected.size === 0 && message && (
+        <View style={styles.toast} pointerEvents="none" accessibilityLiveRegion="polite">
+          <Text style={styles.toastText}>{message}</Text>
+        </View>
+      )}
+      {selected.size > 0 && (
+        <SelectionBar
+          reference={formatReference(book, chapter, selectedVerses)}
+          currentColor={currentColor}
+          anyHighlighted={anyHighlighted}
+          message={message}
+          onHighlight={onHighlight}
+          onRemoveHighlight={onRemoveHighlight}
+          onCopy={onCopy}
+          onShare={onShare}
+          onClear={clearSelection}
+        />
+      )}
 
       <BookPicker
         visible={bookPickerOpen}
@@ -243,6 +342,17 @@ const styles = StyleSheet.create({
   versionCaret: { fontSize: 12 },
   pressed: { opacity: 0.6 },
   scroll: { paddingBottom: Spacing.six },
+  toast: {
+    position: 'absolute',
+    bottom: Spacing.five,
+    alignSelf: 'center',
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
+    borderRadius: 999,
+    backgroundColor: Colors.navy,
+  },
+  toastText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600', fontFamily: Fonts.sans },
+  scrollWithBar: { paddingBottom: 240 }, // room so the last verses can scroll above the selection bar
   column: {
     width: '100%',
     maxWidth: MaxReadingWidth,
