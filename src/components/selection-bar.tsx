@@ -15,6 +15,7 @@ type Props = {
   onHighlight: (color: string) => void;
   onRemoveHighlight: () => void;
   onBookmark: () => void;
+  onNote: () => void;
   onCopy: () => void;
   onShare: () => void;
   onClear: () => void;
@@ -74,9 +75,12 @@ export function SelectionBar(props: Props) {
 
         <View style={styles.actions}>
           <ActionButton
-            label={props.bookmarked ? 'Bookmarked ✓' : 'Bookmark'}
+            label="Bookmark"
+            active={props.bookmarked}
+            accessibilityLabel={props.bookmarked ? 'Bookmarked — edit bookmark' : 'Bookmark'}
             onPress={props.onBookmark}
           />
+          <ActionButton label="Note" onPress={props.onNote} />
           <ActionButton label="Copy" onPress={props.onCopy} />
           <ActionButton label="Share" onPress={props.onShare} />
         </View>
@@ -85,13 +89,26 @@ export function SelectionBar(props: Props) {
   );
 }
 
-function ActionButton({ label, onPress }: { label: string; onPress: () => void }) {
+function ActionButton({
+  label,
+  onPress,
+  active,
+  accessibilityLabel,
+}: {
+  label: string;
+  onPress: () => void;
+  active?: boolean;
+  accessibilityLabel?: string;
+}) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.action, pressed && styles.pressed]}>
-      <Text style={styles.actionText}>{label}</Text>
+      accessibilityLabel={accessibilityLabel ?? label}
+      style={({ pressed }) => [styles.action, active && styles.actionActive, pressed && styles.pressed]}>
+      <Text style={[styles.actionText, active && styles.actionTextActive]}>
+        {active ? `${label} ✓` : label}
+      </Text>
     </Pressable>
   );
 }
@@ -159,6 +176,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  actionActive: { backgroundColor: Colors.navy, borderColor: Colors.navy },
+  actionTextActive: { color: '#FFFFFF' },
   actionText: { fontSize: 15, fontWeight: '600', color: Colors.navy, fontFamily: Fonts.sans },
   pressed: { opacity: 0.6 },
 });

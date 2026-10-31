@@ -12,7 +12,11 @@ type Props = {
   bookmarked: ReadonlySet<number>;
   /** Verses briefly emphasized after opening a bookmark. */
   focused: ReadonlySet<number>;
+  /** verse → number of personal notes on it. */
+  noteCounts: ReadonlyMap<number, number>;
   onToggleVerse: (verse: number) => void;
+  /** Tap on a verse's note marker. */
+  onOpenNotes: (verse: number) => void;
   /** Reports each verse row's y position (relative to this component) for scrolling. */
   onVerseLayout?: (verse: number, y: number) => void;
 };
@@ -28,9 +32,14 @@ export function ChapterText({
   selected,
   bookmarked,
   focused,
+  noteCounts,
   onToggleVerse,
+  onOpenNotes,
   onVerseLayout,
 }: Props) {
+  // Only reserve space for note markers when this chapter has notes, so phones keep
+  // the full reading width otherwise.
+  const showNoteGutter = noteCounts.size > 0;
   return (
     <View>
       {verses.map((text, i) => {
@@ -40,13 +49,14 @@ export function ChapterText({
         const isSelected = selected.has(verse);
         const isBookmarked = bookmarked.has(verse);
         const isFocused = focused.has(verse);
+        const noteCount = noteCounts.get(verse) ?? 0;
         return (
           <Pressable
             key={verse}
             onPress={() => onToggleVerse(verse)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
-            accessibilityLabel={`Verse ${verse}${color ? ', highlighted' : ''}${isBookmarked ? ', bookmarked' : ''}. ${text}`}
+            accessibilityLabel={`Verse ${verse}${color ? ', highlighted' : ''}${isBookmarked ? ', bookmarked' : ''}${noteCount ? `, ${noteCount} ${noteCount === 1 ? 'note' : 'notes'}` : ''}. ${text}`}
             accessibilityHint={isSelected ? 'Tap to unselect' : 'Tap to select'}
             onLayout={onVerseLayout ? (e) => onVerseLayout(verse, e.nativeEvent.layout.y) : undefined}
             style={[styles.row, isFocused && styles.rowFocused, isSelected && styles.rowSelected]}>
@@ -57,6 +67,23 @@ export function ChapterText({
             <View style={[styles.textWrap, color ? { backgroundColor: highlightSwatch(color) } : null]}>
               <Text style={[styles.text, isSelected && styles.textSelected]}>{text}</Text>
             </View>
+            {showNoteGutter && (
+            <View style={styles.noteGutter}>
+              {noteCount > 0 && (
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation?.();
+                    onOpenNotes(verse);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Open ${noteCount} ${noteCount === 1 ? 'note' : 'notes'} on verse ${verse}`}
+                  hitSlop={8}
+                  style={({ pressed }) => [styles.noteMark, pressed && styles.pressed]}>
+                  <Text style={styles.noteMarkText}>{noteCount}</Text>
+                </Pressable>
+              )}
+            </View>
+            )}
           </Pressable>
         );
       })}
@@ -104,6 +131,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif,
     writingDirection: 'ltr',
   },
+  noteGutter: { width: 30, alignItems: 'center', paddingTop: 6 },
+  noteMark: {
+    minWidth: 22,
+    height: 20,
+    paddingHorizontal: 5,
+    borderRadius: 5,
+    borderBottomRightRadius: 1,
+    backgroundColor: Colors.navy,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noteMarkText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700', fontFamily: Fonts.sans },
+  pressed: { opacity: 0.6 },
   textSelected: {
     textDecorationLine: 'underline',
     textDecorationStyle: 'dotted',

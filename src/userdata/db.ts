@@ -29,6 +29,20 @@ const MIGRATIONS: string[] = [
      UNIQUE (book, chapter, verses)
    );
    CREATE INDEX IF NOT EXISTS bookmarks_by_chapter ON bookmarks (book, chapter);`,
+  // 3 — personal notes on a verse or set of verses. `format` is 'plain' for now (room for
+  // simple formatting later); `tags` is a comma list of lowercase tags.
+  `CREATE TABLE IF NOT EXISTS notes (
+     id INTEGER PRIMARY KEY AUTOINCREMENT,
+     book TEXT NOT NULL,
+     chapter INTEGER NOT NULL,
+     verses TEXT NOT NULL,
+     body TEXT NOT NULL,
+     format TEXT NOT NULL DEFAULT 'plain',
+     tags TEXT NOT NULL DEFAULT '',
+     created_at INTEGER NOT NULL,
+     updated_at INTEGER NOT NULL
+   );
+   CREATE INDEX IF NOT EXISTS notes_by_chapter ON notes (book, chapter);`,
 ];
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;

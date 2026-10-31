@@ -36,6 +36,7 @@ export function AppMenu({ onChangeVersion }: Props) {
       : []),
     { label: 'Search', onPress: nav('/search') },
     { label: 'Bookmarks', onPress: nav('/bookmarks') },
+    { label: 'Notes', onPress: nav('/notes') },
     { label: 'Settings', onPress: nav('/settings') },
     { label: 'About & credits', onPress: nav('/about') },
     { label: 'License', onPress: nav('/license') },

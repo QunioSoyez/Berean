@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
   type ScrollViewInstance,
 } from 'react-native';
@@ -22,6 +23,7 @@ import { AppMenu } from '@/components/app-menu';
 import { BookmarkDialog } from '@/components/bookmark-dialog';
 import { BookPicker } from '@/components/book-picker';
 import { ChapterText } from '@/components/chapter-text';
+import { NotesPanel } from '@/components/notes-panel';
 import { SelectionBar } from '@/components/selection-bar';
 import { VersionPicker } from '@/components/version-picker';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
@@ -29,10 +31,15 @@ import { goHome } from '@/navigation';
 import { shareText } from '@/share-text';
 import { saveLastPosition } from '@/state/last-position';
 import { bookmarkTitle, defaultBookmarkLabel } from '@/userdata/bookmark-types';
+import { noteCovers } from '@/userdata/note-types';
 import { useChapterBookmarks } from '@/userdata/use-chapter-bookmarks';
+import { listAllTags, useChapterNotes } from '@/userdata/use-chapter-notes';
 import { useHighlights } from '@/userdata/use-highlights';
 
-type Params = { version: string; book: string; chapter: string; v?: string };
+type Params = { version: string; book: string; chapter: string; v?: string; notes?: string };
+
+/** Screens at least this wide show the notes panel as a column beside the text. */
+const WIDE_LAYOUT = 960;
 
 export default function ReaderScreen() {
   const params = useLocalSearchParams<Params>();
@@ -50,7 +57,15 @@ export default function ReaderScreen() {
     .map(Number)
     .filter((n) => Number.isInteger(n) && n > 0);
 
-  return <Reader version={version.id} book={book.id} chapter={chapter} focus={focus} />;
+  return (
+    <Reader
+      version={version.id}
+      book={book.id}
+      chapter={chapter}
+      focus={focus}
+      openNotes={params.notes === '1'}
+    />
+  );
 }
 
 function Reader({
@@ -58,12 +73,15 @@ function Reader({
   book,
   chapter,
   focus,
+  openNotes,
 }: {
   version: string;
   book: string;
   chapter: number;
-  /** Verses to scroll to and briefly mark (from a bookmark). */
+  /** Verses to scroll to and briefly mark (from a bookmark or note). */
   focus: number[];
+  /** Open the notes panel for the focus verses (from the Notes page). */
+  openNotes: boolean;
 }) {
   const bookInfo = getBook(book)!;
   const versionInfo = getVersion(version)!;
@@ -76,6 +94,13 @@ function Reader({
   const hl = useHighlights(book, chapter);
   const bm = useChapterBookmarks(book, chapter);
   const [bookmarkDialogOpen, setBookmarkDialogOpen] = useState(false);
+  const nt = useChapterNotes(book, chapter);
+  const [notesPanel, setNotesPanel] = useState<{ verses: number[]; compose: boolean } | null>(
+    openNotes && focus.length ? { verses: focus, compose: false } : null,
+  );
+  const [knownTags, setKnownTags] = useState<string[]>([]);
+  const { width } = useWindowDimensions();
+  const wide = width >= WIDE_LAYOUT;
 
   // Scrolling to a bookmarked verse: remember where the text and each verse row sit.
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -160,6 +185,28 @@ function Reader({
   useEffect(() => {
     if (bm.error) flash(bm.error);
   }, [bm.error, flash]);
+  useEffect(() => {
+    if (nt.error) flash(nt.error);
+  }, [nt.error, flash]);
+
+  // Notes panel: close it when the chapter changes; load tag suggestions when it opens.
+  const chapterKey = `${book}/${chapter}`;
+  const openedChapter = useRef(chapterKey);
+  useEffect(() => {
+    if (openedChapter.current !== chapterKey) {
+      openedChapter.current = chapterKey;
+      setNotesPanel(null);
+    }
+  }, [chapterKey]);
+  const panelOpen = notesPanel !== null;
+  useEffect(() => {
+    if (panelOpen) listAllTags().then(setKnownTags).catch(() => {});
+  }, [panelOpen]);
+  const panelNotes = notesPanel ? nt.notes.filter((n) => noteCovers(n, notesPanel.verses)) : [];
+  const afterNoteChange = async (ok: boolean) => {
+    if (ok) listAllTags().then(setKnownTags).catch(() => {});
+    return ok;
+  };
 
   const toggleVerse = useCallback((verse: number) => {
     setSelected((prevSel) => {
@@ -214,6 +261,10 @@ function Reader({
     hl.unhighlight(selectedVerses);
     clearSelection();
   };
+  const onNote = () => {
+    setNotesPanel({ verses: selectedVerses, compose: true });
+    clearSelection();
+  };
   const onCopy = async () => {
     try {
       await Clipboard.setStringAsync(passageText());
@@ -252,7 +303,10 @@ function Reader({
       const target = e.target as HTMLElement | null;
       if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') return;
       if (bookPickerOpen || versionPickerOpen || bookmarkDialogOpen) return;
-      if (e.key === 'Escape') clearSelection();
+      if (e.key === 'Escape') {
+        clearSelection();
+        setNotesPanel(null);
+      }
       if (e.key === 'ArrowLeft' && prev) go(prev);
       if (e.key === 'ArrowRight' && next) go(next);
     };
@@ -297,12 +351,14 @@ function Reader({
         </View>
       </View>
 
+      <View style={styles.content}>
       {/* Chapter */}
       <ScrollView
         ref={scrollRef}
         onContentSizeChange={tryScroll}
         onScrollBeginDrag={stopAutoScroll}
         key={`${version}/${book}/${chapter}`}
+        style={styles.scrollView}
         contentContainerStyle={[styles.scroll, selected.size > 0 && styles.scrollWithBar]}>
         <View style={styles.column}>
           <Text style={styles.chapterHeading} accessibilityRole="header">
@@ -332,7 +388,9 @@ function Reader({
                 selected={selected}
                 bookmarked={bm.bookmarkedVerses}
                 focused={focused}
+                noteCounts={nt.counts}
                 onToggleVerse={toggleVerse}
+                onOpenNotes={(v) => setNotesPanel({ verses: [v], compose: false })}
                 onVerseLayout={onVerseLayout}
               />
             </View>
@@ -350,6 +408,23 @@ function Reader({
         </View>
       </ScrollView>
 
+      {notesPanel && (
+        <NotesPanel
+          mode={wide ? 'docked' : 'overlay'}
+          book={book}
+          chapter={chapter}
+          verses={notesPanel.verses}
+          notes={panelNotes}
+          knownTags={knownTags}
+          startComposing={notesPanel.compose}
+          onClose={() => setNotesPanel(null)}
+          onAdd={async (input) => afterNoteChange(await nt.add(notesPanel.verses, input))}
+          onEdit={async (id, input) => afterNoteChange(await nt.edit(id, input))}
+          onDelete={async (id) => afterNoteChange(await nt.remove(id))}
+        />
+      )}
+      </View>
+
       {selected.size === 0 && message && (
         <View style={styles.toast} pointerEvents="none" accessibilityLiveRegion="polite">
           <Text style={styles.toastText}>{message}</Text>
@@ -362,6 +437,7 @@ function Reader({
           anyHighlighted={anyHighlighted}
           bookmarked={!!existingBookmark}
           onBookmark={() => setBookmarkDialogOpen(true)}
+          onNote={onNote}
           message={message}
           onHighlight={onHighlight}
           onRemoveHighlight={onRemoveHighlight}
@@ -438,6 +514,8 @@ function NavButton({
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
+  content: { flex: 1, flexDirection: 'row' },
+  scrollView: { flex: 1 },
   header: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.border,

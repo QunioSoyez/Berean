@@ -49,10 +49,13 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Fix: Psalm 119 stanza headings (KJV/ASV) no longer flip lines right-to-left
 
 ## Round 4 — Personal notes
-- [ ] Add / edit / delete a note on a verse or range *(PRD)*
-- [ ] Tags on notes *(PRD)*
-- [ ] Note indicator on verses that have notes
-- [ ] Notes list with filter by tag / book, and text search *(PRD)*
+- [x] Add / edit / delete notes on a verse or several verses; many notes per verse *(PRD)*
+- [x] Notes show in every version (attached to the verse, like highlights)
+- [x] Up to 5 tags per note, with suggestions from tags you've used *(PRD)*
+- [x] Note marker (with count) beside verses that have notes
+- [x] Notes panel pops out when you tap a marker or "Note": side column on wide screens, slides over on phones
+- [x] Notes page (menu): search, filter by tag or book, newest first; tap to open the verse with its notes *(PRD)*
+- [ ] Simple formatting in notes (bold, italic, lists) — next up (notes are stored ready for it)
 
 ## Round 5 — Bible search
 - [ ] Keyword search in the current version *(PRD)*

@@ -6,8 +6,17 @@ export function goHome() {
   else router.replace('/');
 }
 
-/** Link to a chapter. `verses` (optional) scrolls to and briefly marks those verses. */
-export function chapterHref(version: string, book: string, chapter: number, verses?: number[]): Href {
+/**
+ * Link to a chapter. `verses` (optional) scrolls to and briefly marks those verses;
+ * `openNotes` also opens the notes panel for them.
+ */
+export function chapterHref(
+  version: string,
+  book: string,
+  chapter: number,
+  verses?: number[],
+  openNotes?: boolean,
+): Href {
   return {
     pathname: '/read/[version]/[book]/[chapter]',
     params: {
@@ -15,6 +24,7 @@ export function chapterHref(version: string, book: string, chapter: number, vers
       book,
       chapter: String(chapter),
       ...(verses?.length ? { v: verses.join(',') } : {}),
+      ...(verses?.length && openNotes ? { notes: '1' } : {}),
     },
   };
 }
