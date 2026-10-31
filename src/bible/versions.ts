@@ -10,6 +10,8 @@ export type Version = {
   year: string;
   /** Shown under the chapter text. */
   copyright: string;
+  /** Where the bundled text came from (About & credits screen). */
+  source: string;
 };
 
 export const VERSIONS: readonly Version[] = [
@@ -19,6 +21,7 @@ export const VERSIONS: readonly Version[] = [
     name: 'King James Version',
     year: '1769',
     copyright: 'Public domain.',
+    source: 'scrollmapper/bible_databases (GitHub)',
   },
   {
     id: 'WEB',
@@ -26,6 +29,7 @@ export const VERSIONS: readonly Version[] = [
     name: 'World English Bible',
     year: '',
     copyright: 'Public domain. “World English Bible” is a trademark of eBible.org.',
+    source: 'eBible.org, via the world-english-bible npm package',
   },
   {
     id: 'ASV',
@@ -33,6 +37,7 @@ export const VERSIONS: readonly Version[] = [
     name: 'American Standard Version',
     year: '1901',
     copyright: 'Public domain.',
+    source: 'scrollmapper/bible_databases (GitHub)',
   },
   {
     id: 'YLT',
@@ -40,6 +45,7 @@ export const VERSIONS: readonly Version[] = [
     name: "Young's Literal Translation",
     year: '1898',
     copyright: 'Public domain.',
+    source: 'scrollmapper/bible_databases (GitHub)',
   },
 ];
 

@@ -7,10 +7,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getBook, nextChapter, prevChapter, type ChapterRef } from '@/bible/books';
 import { useChapter } from '@/bible/use-chapter';
 import { getVersion } from '@/bible/versions';
+import { AppMenu } from '@/components/app-menu';
 import { BookPicker } from '@/components/book-picker';
 import { ChapterText } from '@/components/chapter-text';
 import { VersionPicker } from '@/components/version-picker';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
+import { goHome } from '@/navigation';
 import { saveLastPosition } from '@/state/last-position';
 
 type Params = { version: string; book: string; chapter: string };
@@ -78,11 +80,14 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerInner}>
-          <Image
-            source={require('@/assets/images/logo-mark.png')}
-            style={styles.logo}
-            accessibilityLabel="Berean"
-          />
+          <Pressable
+            onPress={goHome}
+            accessibilityRole="button"
+            accessibilityLabel="Home"
+            hitSlop={6}
+            style={({ pressed }) => pressed && styles.pressed}>
+            <Image source={require('@/assets/images/logo-mark.png')} style={styles.logo} />
+          </Pressable>
           <Pressable
             onPress={() => setBookPickerOpen(true)}
             accessibilityRole="button"
@@ -101,6 +106,7 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
             <Text style={styles.versionText}>{versionInfo.abbr}</Text>
             <Text style={[styles.caret, styles.versionCaret]}>▾</Text>
           </Pressable>
+          <AppMenu onChangeVersion={() => setVersionPickerOpen(true)} />
         </View>
       </View>
 

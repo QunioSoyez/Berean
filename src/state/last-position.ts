@@ -25,6 +25,15 @@ export async function getLastPosition(): Promise<Position> {
   }
 }
 
+/** True once the reader has opened any chapter (used for "Start" vs "Continue" reading). */
+export async function hasSavedPosition(): Promise<boolean> {
+  try {
+    return (await AsyncStorage.getItem(KEY)) != null;
+  } catch {
+    return false;
+  }
+}
+
 export async function saveLastPosition(p: Position): Promise<void> {
   try {
     await AsyncStorage.setItem(KEY, JSON.stringify(p));

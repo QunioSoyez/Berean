@@ -19,6 +19,14 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Reopens at the last chapter you read
 - [x] Web: shareable URLs (`/read/KJV/JHN/3`), left/right arrow keys change chapter
 
+## Round 1b — Landing screen & menu
+- [x] Landing screen: centered logo, Bible version selector, Start/Continue reading button
+- [x] Landing quick links: Browse books, Bookmarks (coming soon), Search (coming soon)
+- [x] Reader: tap the logo (top left) to go home
+- [x] Hamburger menu (top right): Bible version, Search, Bookmarks, Settings, About & credits, License
+- [x] About & credits page (Bible text sources, privacy) and License page (MIT)
+- [x] Placeholder "coming soon" pages for Bookmarks, Search, Settings
+
 ## Round 2 — Verse selection & highlighting
 - [ ] Tap verse(s) to select; action bar appears *(PRD)*
 - [ ] Highlight in a few colors; remove highlight *(added)*
@@ -31,7 +39,6 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] Prevent duplicate bookmarks *(PRD)*
 - [ ] Bookmarks list; tap to jump to passage
 - [ ] Edit bookmark label; delete *(PRD)*
-- [ ] Bottom tab bar: Read · Library · Search · Settings
 
 ## Round 4 — Personal notes
 - [ ] Add / edit / delete a note on a verse or range *(PRD)*
@@ -54,6 +61,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] Side-by-side or verse-by-verse comparison of 2+ versions *(PRD)*
 
 ## Round 8 — Settings, polish & accessibility
+- [ ] Settings screen (in the menu)
 - [ ] Text size setting
 - [ ] Optional paragraph (flowing) layout
 - [ ] Swipe left/right to change chapter on phones
