@@ -3,6 +3,8 @@
 Bible Study App — read and compare Bible versions, highlight, bookmark and take notes.
 Everything is stored on your device; no account needed.
 
+**Test web app:** https://berean.michaelbarnes0.workers.dev
+
 Built with [Expo](https://expo.dev) (React Native + Expo Router) for iOS, Android and web.
 
 See [FEATURES.md](FEATURES.md) for the feature checklist and build rounds.
@@ -37,6 +39,16 @@ src/state/      Saved app state (last position, later: user data)
 assets/bibles/  Bundled Bible text, one .bjson file per book (generated)
 scripts/        Build scripts (Bible data)
 ```
+
+## Web deploy (Cloudflare)
+
+The web version is a Cloudflare Worker serving static files (`wrangler.jsonc`).
+Cloudflare rebuilds and deploys it on every push to `main`:
+
+- Build command: `npx expo export --platform web`
+- Deploy command: `npx wrangler deploy`
+
+On iPhone, open the link in Safari → Share → **Add to Home Screen** to use it like an app.
 
 ## Bible texts
 
