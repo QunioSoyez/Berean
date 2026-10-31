@@ -2,7 +2,16 @@ import * as Clipboard from 'expo-clipboard';
 import { Image } from 'expo-image';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type ScrollViewInstance,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getBook, nextChapter, prevChapter, type ChapterRef } from '@/bible/books';
@@ -10,6 +19,7 @@ import { formatPassageForSharing, formatReference } from '@/bible/reference';
 import { useChapter } from '@/bible/use-chapter';
 import { getVersion } from '@/bible/versions';
 import { AppMenu } from '@/components/app-menu';
+import { BookmarkDialog } from '@/components/bookmark-dialog';
 import { BookPicker } from '@/components/book-picker';
 import { ChapterText } from '@/components/chapter-text';
 import { SelectionBar } from '@/components/selection-bar';
@@ -18,9 +28,11 @@ import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { goHome } from '@/navigation';
 import { shareText } from '@/share-text';
 import { saveLastPosition } from '@/state/last-position';
+import { bookmarkTitle, defaultBookmarkLabel } from '@/userdata/bookmark-types';
+import { useChapterBookmarks } from '@/userdata/use-chapter-bookmarks';
 import { useHighlights } from '@/userdata/use-highlights';
 
-type Params = { version: string; book: string; chapter: string };
+type Params = { version: string; book: string; chapter: string; v?: string };
 
 export default function ReaderScreen() {
   const params = useLocalSearchParams<Params>();
@@ -33,10 +45,26 @@ export default function ReaderScreen() {
     return <Redirect href="/" />;
   }
 
-  return <Reader version={version.id} book={book.id} chapter={chapter} />;
+  const focus = (params.v ?? '')
+    .split(',')
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n > 0);
+
+  return <Reader version={version.id} book={book.id} chapter={chapter} focus={focus} />;
 }
 
-function Reader({ version, book, chapter }: { version: string; book: string; chapter: number }) {
+function Reader({
+  version,
+  book,
+  chapter,
+  focus,
+}: {
+  version: string;
+  book: string;
+  chapter: number;
+  /** Verses to scroll to and briefly mark (from a bookmark). */
+  focus: number[];
+}) {
   const bookInfo = getBook(book)!;
   const versionInfo = getVersion(version)!;
   const state = useChapter(version, book, chapter);
@@ -46,6 +74,16 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
   const [message, setMessage] = useState<string | null>(null);
   const messageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hl = useHighlights(book, chapter);
+  const bm = useChapterBookmarks(book, chapter);
+  const [bookmarkDialogOpen, setBookmarkDialogOpen] = useState(false);
+
+  // Scrolling to a bookmarked verse: remember where the text and each verse row sit.
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  const textTop = useRef(0);
+  const rowY = useRef(new Map<number, number>());
+  const focusKey = focus.join(',');
+  const [focused, setFocused] = useState<ReadonlySet<number>>(new Set(focus));
+  const pendingScroll = useRef<number | null>(focus[0] ?? null);
 
   const prev = prevChapter({ book, chapter });
   const next = nextChapter({ book, chapter });
@@ -53,7 +91,35 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
   useEffect(() => {
     saveLastPosition({ version, book, chapter });
     setSelected(new Set()); // new chapter or version → start with nothing selected
+    rowY.current = new Map();
   }, [version, book, chapter]);
+
+  // Opened from a bookmark: mark those verses for a few seconds and scroll to the first.
+  useEffect(() => {
+    const verses = focusKey ? focusKey.split(',').map(Number) : [];
+    setFocused(new Set(verses));
+    pendingScroll.current = verses[0] ?? null;
+    if (!verses.length) return;
+    const t = setTimeout(() => setFocused(new Set()), 4000);
+    return () => clearTimeout(t);
+  }, [focusKey, book, chapter]);
+
+  const tryScroll = useCallback(() => {
+    const target = pendingScroll.current;
+    if (target == null) return;
+    const y = rowY.current.get(target);
+    if (y == null) return;
+    pendingScroll.current = null;
+    scrollRef.current?.scrollTo({ y: Math.max(0, textTop.current + y - Spacing.four), animated: false });
+  }, []);
+
+  const onVerseLayout = useCallback(
+    (verse: number, y: number) => {
+      rowY.current.set(verse, y);
+      if (verse === pendingScroll.current) tryScroll();
+    },
+    [tryScroll],
+  );
 
   // Short status line in the selection bar ("Copied", errors), cleared after a moment.
   const flash = useCallback((text: string) => {
@@ -64,6 +130,9 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
   useEffect(() => {
     if (hl.error) flash(hl.error);
   }, [hl.error, flash]);
+  useEffect(() => {
+    if (bm.error) flash(bm.error);
+  }, [bm.error, flash]);
 
   const toggleVerse = useCallback((verse: number) => {
     setSelected((prevSel) => {
@@ -79,6 +148,26 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
   const selectedColors = new Set(selectedVerses.map((v) => hl.highlights.get(v) ?? null));
   const currentColor = selectedColors.size === 1 ? [...selectedColors][0] : null;
   const anyHighlighted = selectedVerses.some((v) => hl.highlights.has(v));
+  const existingBookmark = selectedVerses.length ? bm.find(selectedVerses) : undefined;
+
+  const onSaveBookmark = async (label: string | null) => {
+    setBookmarkDialogOpen(false);
+    const ok = await bm.save(selectedVerses, label);
+    if (ok) {
+      const title = label ?? defaultBookmarkLabel(book, chapter, selectedVerses);
+      clearSelection();
+      flash(existingBookmark ? 'Bookmark updated' : `Bookmarked: ${title}`);
+    }
+  };
+  const onRemoveBookmark = async () => {
+    setBookmarkDialogOpen(false);
+    if (!existingBookmark) return;
+    const ok = await bm.remove(existingBookmark.id);
+    if (ok) {
+      clearSelection();
+      flash(`Removed bookmark: ${bookmarkTitle(existingBookmark)}`);
+    }
+  };
 
   const passageText = () =>
     state.status === 'ready'
@@ -135,14 +224,14 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') return;
-      if (bookPickerOpen || versionPickerOpen) return;
+      if (bookPickerOpen || versionPickerOpen || bookmarkDialogOpen) return;
       if (e.key === 'Escape') clearSelection();
       if (e.key === 'ArrowLeft' && prev) go(prev);
       if (e.key === 'ArrowRight' && next) go(next);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [go, prev, next, bookPickerOpen, versionPickerOpen, clearSelection]);
+  }, [go, prev, next, bookPickerOpen, versionPickerOpen, bookmarkDialogOpen, clearSelection]);
 
   const title = `${bookInfo.name} ${chapter}`;
 
@@ -183,6 +272,7 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
 
       {/* Chapter */}
       <ScrollView
+        ref={scrollRef}
         key={`${version}/${book}/${chapter}`}
         contentContainerStyle={[styles.scroll, selected.size > 0 && styles.scrollWithBar]}>
         <View style={styles.column}>
@@ -202,12 +292,21 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
             </View>
           )}
           {state.status === 'ready' && (
-            <ChapterText
-              verses={state.verses}
-              highlights={hl.highlights}
-              selected={selected}
-              onToggleVerse={toggleVerse}
-            />
+            <View
+              onLayout={(e) => {
+                textTop.current = e.nativeEvent.layout.y;
+                tryScroll();
+              }}>
+              <ChapterText
+                verses={state.verses}
+                highlights={hl.highlights}
+                selected={selected}
+                bookmarked={bm.bookmarkedVerses}
+                focused={focused}
+                onToggleVerse={toggleVerse}
+                onVerseLayout={onVerseLayout}
+              />
+            </View>
           )}
 
           {/* Previous / next */}
@@ -232,6 +331,8 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
           reference={formatReference(book, chapter, selectedVerses)}
           currentColor={currentColor}
           anyHighlighted={anyHighlighted}
+          bookmarked={!!existingBookmark}
+          onBookmark={() => setBookmarkDialogOpen(true)}
           message={message}
           onHighlight={onHighlight}
           onRemoveHighlight={onRemoveHighlight}
@@ -240,6 +341,17 @@ function Reader({ version, book, chapter }: { version: string; book: string; cha
           onClear={clearSelection}
         />
       )}
+
+      <BookmarkDialog
+        visible={bookmarkDialogOpen}
+        editing={!!existingBookmark}
+        reference={`${formatReference(book, chapter, selectedVerses)} (${versionInfo.abbr})`}
+        defaultLabel={defaultBookmarkLabel(book, chapter, selectedVerses)}
+        initialLabel={existingBookmark?.label ?? null}
+        onCancel={() => setBookmarkDialogOpen(false)}
+        onSave={onSaveBookmark}
+        onRemove={existingBookmark ? onRemoveBookmark : undefined}
+      />
 
       <BookPicker
         visible={bookPickerOpen}

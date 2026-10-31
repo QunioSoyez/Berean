@@ -6,10 +6,16 @@ export function goHome() {
   else router.replace('/');
 }
 
-export function chapterHref(version: string, book: string, chapter: number): Href {
+/** Link to a chapter. `verses` (optional) scrolls to and briefly marks those verses. */
+export function chapterHref(version: string, book: string, chapter: number, verses?: number[]): Href {
   return {
     pathname: '/read/[version]/[book]/[chapter]',
-    params: { version, book, chapter: String(chapter) },
+    params: {
+      version,
+      book,
+      chapter: String(chapter),
+      ...(verses?.length ? { v: verses.join(',') } : {}),
+    },
   };
 }
 

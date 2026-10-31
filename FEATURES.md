@@ -39,10 +39,14 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Web: Esc clears the selection
 
 ## Round 3 — Bookmarks
-- [ ] Add / remove bookmark on a verse or chapter *(PRD)*
-- [ ] Prevent duplicate bookmarks *(PRD)*
-- [ ] Bookmarks list; tap to jump to passage
-- [ ] Edit bookmark label; delete *(PRD)*
+- [x] Bookmark a verse or several verses from the selection bar *(PRD)*
+- [x] Optional name; default name is "Book-Chapter:Verse" (e.g. John-3:16)
+- [x] Prevent duplicate bookmarks — same verses show "Bookmarked ✓" and open the edit dialog *(PRD)*
+- [x] Small gold marker on bookmarked verses
+- [x] Bookmarks list (newest first) with verse preview in the version you're reading
+- [x] Tap a bookmark to open it in your current version, scrolled to the verse
+- [x] Rename / delete bookmarks (delete asks to confirm) *(PRD)*
+- [x] Fix: Psalm 119 stanza headings (KJV/ASV) no longer flip lines right-to-left
 
 ## Round 4 — Personal notes
 - [ ] Add / edit / delete a note on a verse or range *(PRD)*

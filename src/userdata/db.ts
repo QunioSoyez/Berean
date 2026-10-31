@@ -17,6 +17,18 @@ const MIGRATIONS: string[] = [
      updated_at INTEGER NOT NULL,
      PRIMARY KEY (book, chapter, verse)
    );`,
+  // 2 — bookmarks on a verse or set of verses; `verses` is a sorted comma list ("16,17")
+  `CREATE TABLE IF NOT EXISTS bookmarks (
+     id INTEGER PRIMARY KEY AUTOINCREMENT,
+     book TEXT NOT NULL,
+     chapter INTEGER NOT NULL,
+     verses TEXT NOT NULL,
+     label TEXT,
+     created_at INTEGER NOT NULL,
+     updated_at INTEGER NOT NULL,
+     UNIQUE (book, chapter, verses)
+   );
+   CREATE INDEX IF NOT EXISTS bookmarks_by_chapter ON bookmarks (book, chapter);`,
 ];
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;

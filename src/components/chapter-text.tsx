@@ -8,7 +8,13 @@ type Props = {
   verses: string[];
   highlights: ChapterHighlights;
   selected: ReadonlySet<number>;
+  /** Verses covered by a bookmark — shown with a small gold marker. */
+  bookmarked: ReadonlySet<number>;
+  /** Verses briefly emphasized after opening a bookmark. */
+  focused: ReadonlySet<number>;
   onToggleVerse: (verse: number) => void;
+  /** Reports each verse row's y position (relative to this component) for scrolling. */
+  onVerseLayout?: (verse: number, y: number) => void;
 };
 
 /**
@@ -16,7 +22,15 @@ type Props = {
  * Tap a verse to select/unselect it. Highlighted verses get a soft background color;
  * selected verses get a navy bar on the left and a dotted underline.
  */
-export function ChapterText({ verses, highlights, selected, onToggleVerse }: Props) {
+export function ChapterText({
+  verses,
+  highlights,
+  selected,
+  bookmarked,
+  focused,
+  onToggleVerse,
+  onVerseLayout,
+}: Props) {
   return (
     <View>
       {verses.map((text, i) => {
@@ -24,16 +38,22 @@ export function ChapterText({ verses, highlights, selected, onToggleVerse }: Pro
         const verse = i + 1;
         const color = highlights.get(verse);
         const isSelected = selected.has(verse);
+        const isBookmarked = bookmarked.has(verse);
+        const isFocused = focused.has(verse);
         return (
           <Pressable
             key={verse}
             onPress={() => onToggleVerse(verse)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
-            accessibilityLabel={`Verse ${verse}${color ? ', highlighted' : ''}. ${text}`}
+            accessibilityLabel={`Verse ${verse}${color ? ', highlighted' : ''}${isBookmarked ? ', bookmarked' : ''}. ${text}`}
             accessibilityHint={isSelected ? 'Tap to unselect' : 'Tap to select'}
-            style={[styles.row, isSelected && styles.rowSelected]}>
-            <Text style={[styles.number, isSelected && styles.numberSelected]}>{verse}</Text>
+            onLayout={onVerseLayout ? (e) => onVerseLayout(verse, e.nativeEvent.layout.y) : undefined}
+            style={[styles.row, isFocused && styles.rowFocused, isSelected && styles.rowSelected]}>
+            <View style={styles.gutter}>
+              <Text style={[styles.number, isSelected && styles.numberSelected]}>{verse}</Text>
+              {isBookmarked && <View style={styles.bookmarkMark} />}
+            </View>
             <View style={[styles.textWrap, color ? { backgroundColor: highlightSwatch(color) } : null]}>
               <Text style={[styles.text, isSelected && styles.textSelected]}>{text}</Text>
             </View>
@@ -52,10 +72,18 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
   },
   rowSelected: { borderLeftColor: Colors.navy },
+  rowFocused: { borderLeftColor: Colors.gold },
+  gutter: { width: 27, alignItems: 'flex-end', paddingRight: Spacing.two },
+  bookmarkMark: {
+    marginTop: 3,
+    width: 6,
+    height: 10,
+    borderTopLeftRadius: 1,
+    borderTopRightRadius: 1,
+    backgroundColor: Colors.gold,
+  },
   number: {
-    width: 27,
     paddingTop: 6,
-    paddingRight: Spacing.two,
     textAlign: 'right',
     fontSize: 12,
     fontWeight: '600',
@@ -74,6 +102,7 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     color: Colors.text,
     fontFamily: Fonts.serif,
+    writingDirection: 'ltr',
   },
   textSelected: {
     textDecorationLine: 'underline',

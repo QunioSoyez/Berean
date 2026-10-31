@@ -52,8 +52,12 @@ const SCROLLMAPPER =
   'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json';
 
 /** Per-version text clean-up. Keep this minimal — the goal is faithful text. */
+const HEBREW = /[\u0590-\u05FF]/;
+
 const CLEAN = {
-  KJV: (t) => t.replace(/–/g, '-'), // en dash used inside names (Beth–el) → hyphen
+  // en dash used inside names (Beth–el) → hyphen; Psalm 119 stanza letters ("נ NUN. …") keep
+  // only the English name, since a Hebrew character flips the line to right-to-left layout.
+  KJV: (t) => t.replace(/–/g, '-').replace(/^[\u0590-\u05FF]+\s*/, ''),
   ASV: (t) => t,
   YLT: (t) => t.replace(/`/g, "'"), // source uses `quote' style
   WEB: (t) => t,
@@ -75,6 +79,23 @@ async function cached(name, url) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
+/**
+ * ASV puts Psalm 119's next stanza heading at the END of the previous verse
+ * ("… utterly. ב BETH."). Move it to the start of the verse it belongs to ("BETH. …"),
+ * matching KJV/YLT, and drop the Hebrew letter.
+ */
+function moveStanzaHeadings(verses) {
+  const out = [...verses];
+  for (let i = 0; i < out.length; i++) {
+    const m = out[i].match(/\s*[\u0590-\u05FF]+\s+([A-Z]+)\.?\s*$/);
+    if (m && i + 1 < out.length) {
+      out[i] = out[i].slice(0, m.index).trim();
+      out[i + 1] = `${m[1]}. ${out[i + 1]}`;
+    }
+  }
+  return out;
+}
+
 /** scrollmapper format: { books: [{ name, chapters: [{ chapter, verses: [{ verse, text }] }] }] } */
 async function loadScrollmapper(id) {
   const data = await cached(`${id}.json`, `${SCROLLMAPPER}/${id}.json`);
@@ -84,7 +105,7 @@ async function loadScrollmapper(id) {
     for (const ch of book.chapters) {
       const verses = [];
       for (const v of ch.verses) verses[v.verse - 1] = tidy(CLEAN[id](v.text));
-      chapters[ch.chapter - 1] = Array.from(verses, (v) => v ?? '');
+      chapters[ch.chapter - 1] = moveStanzaHeadings(Array.from(verses, (v) => v ?? ''));
     }
     return chapters;
   });
@@ -158,6 +179,15 @@ async function main() {
   }
 
   writeGenerated(['KJV', 'WEB', 'ASV', 'YLT']);
+  // Warn about any Hebrew characters left in verse text (they break left-to-right layout).
+  for (const v of ['kjv', 'web', 'asv', 'ylt']) {
+    for (const b of BOOK_IDS) {
+      const chapters = JSON.parse(fs.readFileSync(path.join(OUT, v, `${b}.bjson`), 'utf8'));
+      chapters.forEach((ch, c) =>
+        ch.forEach((t, i) => HEBREW.test(t) && console.warn(`  ! ${v} ${b} ${c + 1}:${i + 1} has Hebrew: ${t.slice(0, 50)}`)),
+      );
+    }
+  }
   console.log(`Done. Wrote ${path.relative(ROOT, OUT)} and ${path.relative(ROOT, GENERATED)}`);
 }
 

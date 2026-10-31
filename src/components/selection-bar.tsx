@@ -9,9 +9,12 @@ type Props = {
   /** Color shared by every selected verse (to mark the active swatch), if any. */
   currentColor: string | null;
   anyHighlighted: boolean;
+  /** True when exactly these verses are already bookmarked. */
+  bookmarked: boolean;
   message: string | null;
   onHighlight: (color: string) => void;
   onRemoveHighlight: () => void;
+  onBookmark: () => void;
   onCopy: () => void;
   onShare: () => void;
   onClear: () => void;
@@ -70,6 +73,10 @@ export function SelectionBar(props: Props) {
         </View>
 
         <View style={styles.actions}>
+          <ActionButton
+            label={props.bookmarked ? 'Bookmarked ✓' : 'Bookmark'}
+            onPress={props.onBookmark}
+          />
           <ActionButton label="Copy" onPress={props.onCopy} />
           <ActionButton label="Share" onPress={props.onShare} />
         </View>

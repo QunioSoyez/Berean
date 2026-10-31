@@ -40,7 +40,7 @@ src/bible/      Bible data: books, versions, loading
 src/components/ UI pieces
 src/constants/  Theme (colors, fonts, spacing)
 src/state/      Saved app state (last position)
-src/userdata/   Your data: highlights (later bookmarks, notes) — SQLite on phones, browser storage on web
+src/userdata/   Your data: highlights, bookmarks (later notes) — SQLite on phones, browser storage on web
 assets/bibles/  Bundled Bible text, one .bjson file per book (generated)
 scripts/        Build scripts (Bible data)
 ```
