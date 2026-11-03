@@ -27,7 +27,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] About & credits page (Bible text sources, privacy) and License page (MIT)
 - [x] Placeholder "coming soon" pages for Bookmarks, Search, Settings
 - [x] Android preview build (EAS) tested on device
-- [x] Web test deploy on Cloudflare (auto-deploys on push): https://berean.michaelbarnes0.workers.dev
+- [x] Web test deploy on Cloudflare (auto-deploys on push)
 
 ## Round 2 — Verse selection & highlighting
 - [x] Tap verse(s) to select; action bar appears *(PRD)*
@@ -81,7 +81,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] Graceful handling of local save failures *(PRD)*
 
 ## Round 9 — Launch
-- [ ] Production web deploy (custom domain?)
+- [ ] Web app on its own domain: https://bereanbible.live (www redirects; old workers.dev address off)
 - [ ] EAS builds; App Store and Google Play listings
 - [ ] Privacy policy page (no data collected)
 

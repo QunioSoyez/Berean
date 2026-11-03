@@ -1,10 +1,17 @@
-// Cloudflare config for the web version of the app (https://berean.michaelbarnes0.workers.dev).
+// Cloudflare config for the web version of the app (https://bereanbible.live).
 // Cloudflare builds it from GitHub on every push to main: `npx expo export --platform web` makes
 // dist/, and `npx wrangler deploy` uploads it using this file.
 {
   // Must match the Worker's name in the Cloudflare dashboard.
   "name": "berean",
   "compatibility_date": "2026-09-01",
+  // Serve the app on our own domain. The bereanbible.live zone must be active in this
+  // Cloudflare account first; deploy then creates the DNS record and certificate itself.
+  // (www.bereanbible.live redirects here via a Redirect Rule in the dashboard.)
+  "routes": [{ "pattern": "bereanbible.live", "custom_domain": true }],
+  // Turn off the old berean.michaelbarnes0.workers.dev address.
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "directory": "./dist/",
     // The app handles its own pages (e.g. /read/KJV/JHN/3), so any path that isn't a real

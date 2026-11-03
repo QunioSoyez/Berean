@@ -7,7 +7,7 @@
 Bible Study App — read and compare Bible versions, highlight, bookmark and take notes.
 Everything is stored on your device; no account needed.
 
-**Test web app:** [berean.michaelbarnes0.workers.dev](https://berean.michaelbarnes0.workers.dev)
+**Web app:** [bereanbible.live](https://bereanbible.live)
 
 Built with [Expo](https://expo.dev) (React Native + Expo Router) for iOS, Android and web.
 
