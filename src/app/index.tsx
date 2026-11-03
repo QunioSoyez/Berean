@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
-import { router, type Href } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect, type Href } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,10 +23,15 @@ export default function Home() {
   const [isFirstRun, setIsFirstRun] = useState(false);
   const [bookPickerOpen, setBookPickerOpen] = useState(false);
 
-  useEffect(() => {
-    getLastPosition().then(setPos);
-    hasSavedPosition().then((saved) => setIsFirstRun(!saved));
-  }, []);
+  // Re-read the saved position every time this screen comes into view. The landing screen
+  // stays open underneath the reader, so reading only once (on first open) left the button
+  // stuck on whatever chapter was saved back then.
+  useFocusEffect(
+    useCallback(() => {
+      getLastPosition().then(setPos);
+      hasSavedPosition().then((saved) => setIsFirstRun(!saved));
+    }, []),
+  );
 
   if (!pos) {
     return (

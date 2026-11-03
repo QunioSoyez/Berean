@@ -55,12 +55,13 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Note marker (with count) beside verses that have notes
 - [x] Notes panel pops out when you tap a marker or "Note": side column on wide screens, slides over on phones
 - [x] Notes page (menu): search, filter by tag or book, newest first; tap to open the verse with its notes *(PRD)*
-- [ ] Simple formatting in notes (bold, italic, lists) — next up (notes are stored ready for it)
+- [x] Formatting toolbar in notes: bold, italic, headings, bulleted and numbered lists, with Write/Preview
 
 ## Round 5 — Bible search
-- [ ] Keyword search in the current version *(PRD)*
-- [ ] Filter by Old/New Testament or book
-- [ ] Jump to a typed reference ("John 3:16", "jn 3 16")
+- [x] Keyword search across all books of the version you're reading *(PRD)*
+- [x] All words must appear (any order); "quotes" for an exact phrase; "love" also finds loved/loveth
+- [x] Results show the reference and verse with matches highlighted; tap to open the verse
+- [x] Search page in the menu and on the landing screen (replaces "coming soon")
 
 ## Round 6 — Commentary (Matthew Henry)
 - [ ] Commentary framework that supports more public-domain resources later

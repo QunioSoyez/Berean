@@ -22,7 +22,7 @@ const toNote = (r: Row): Note => ({
   chapter: r.chapter,
   verses: r.verses.split(',').map(Number),
   body: r.body,
-  format: 'plain',
+  format: r.format === 'markdown' ? 'markdown' : 'plain',
   tags: r.tags ? r.tags.split(',') : [],
   createdAt: r.created_at,
   updatedAt: r.updated_at,
@@ -55,7 +55,7 @@ export async function createNote(
   const now = Date.now();
   await db.runAsync(
     `INSERT INTO notes (book, chapter, verses, body, format, tags, created_at, updated_at)
-     VALUES (?, ?, ?, ?, 'plain', ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, 'markdown', ?, ?, ?)`,
     book,
     chapter,
     versesKey(normalizeVerses(verses)),
@@ -69,7 +69,7 @@ export async function createNote(
 export async function updateNote(id: string, input: NoteInput): Promise<void> {
   const db = await getDb();
   await db.runAsync(
-    'UPDATE notes SET body = ?, tags = ?, updated_at = ? WHERE id = ?',
+    "UPDATE notes SET body = ?, format = 'markdown', tags = ?, updated_at = ? WHERE id = ?",
     input.body.trim(),
     cleanTags(input.tags).join(','),
     Date.now(),

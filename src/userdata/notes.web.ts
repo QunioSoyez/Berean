@@ -41,7 +41,7 @@ export async function createNote(
     chapter,
     verses: normalizeVerses(verses),
     body: input.body.trim(),
-    format: 'plain',
+    format: 'markdown',
     tags: cleanTags(input.tags),
     createdAt: now,
     updatedAt: now,
@@ -54,6 +54,7 @@ export async function updateNote(id: string, input: NoteInput): Promise<void> {
   const n = list.find((x) => x.id === id);
   if (!n) return;
   n.body = input.body.trim();
+  n.format = 'markdown';
   n.tags = cleanTags(input.tags);
   n.updatedAt = Date.now();
   await writeAll(list);

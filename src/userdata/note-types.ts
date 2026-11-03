@@ -8,8 +8,11 @@ export type Note = {
   /** Sorted, unique verse numbers the note is attached to. */
   verses: number[];
   body: string;
-  /** 'plain' for now; a formatted variant can be added later without changing old notes. */
-  format: 'plain';
+  /**
+   * 'markdown' for notes written with the formatting toolbar (**bold**, *italic*, # heading,
+   * - bullets, 1. numbers). 'plain' for older notes, shown exactly as typed.
+   */
+  format: 'plain' | 'markdown';
   /** Lowercase tags, at most MAX_TAGS. */
   tags: string[];
   createdAt: number;

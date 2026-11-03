@@ -7,6 +7,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import type { Note, NoteInput } from '@/userdata/note-types';
 
 import { NoteEditor } from './note-editor';
+import { NoteText } from './note-text';
 import { TagChip } from './tag-chip';
 
 export const NOTES_PANEL_WIDTH = 360;
@@ -129,9 +130,7 @@ export function NotesPanel(props: Props) {
                   year: 'numeric',
                 })}
               </Text>
-              <Text style={styles.noteBody} selectable>
-                {note.body}
-              </Text>
+              <NoteText body={note.body} format={note.format} />
               {note.tags.length > 0 && (
                 <View style={styles.chips}>
                   {note.tags.map((t) => (
@@ -247,7 +246,6 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   cardLabel: { fontSize: 12, fontWeight: '700', color: Colors.textSecondary, fontFamily: Fonts.sans },
-  noteBody: { fontSize: 16, lineHeight: 23, color: Colors.text, fontFamily: Fonts.sans },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.one + 2 },
   cardActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.two },
   actionBtn: { paddingHorizontal: Spacing.two, paddingVertical: 6, borderRadius: 8 },

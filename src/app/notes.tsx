@@ -19,6 +19,7 @@ import { TagChip } from '@/components/tag-chip';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { chapterHref } from '@/navigation';
 import { getLastPosition } from '@/state/last-position';
+import { stripMarkdown } from '@/notes-format/markdown';
 import type { Note } from '@/userdata/note-types';
 import { listNotes } from '@/userdata/notes';
 
@@ -66,7 +67,9 @@ export default function NotesScreen() {
       if (book && n.book !== book) return false;
       if (!q) return true;
       const ref = formatReference(n.book, n.chapter, n.verses).toLowerCase();
-      return n.body.toLowerCase().includes(q) || ref.includes(q) || n.tags.some((t) => t.includes(q));
+      return (
+        plainBody(n).toLowerCase().includes(q) || ref.includes(q) || n.tags.some((t) => t.includes(q))
+      );
     });
   }, [all, query, tag, book]);
 
@@ -157,7 +160,7 @@ export default function NotesScreen() {
                 </Text>
               </Text>
               <Text style={styles.body} numberOfLines={4}>
-                {item.body}
+                {plainBody(item)}
               </Text>
               {item.tags.length > 0 && (
                 <View style={styles.chips}>
@@ -172,6 +175,11 @@ export default function NotesScreen() {
       )}
     </SafeAreaView>
   );
+}
+
+/** Note text without formatting marks, for previews and searching. */
+function plainBody(n: Note): string {
+  return n.format === 'markdown' ? stripMarkdown(n.body) : n.body;
 }
 
 function FilterRow({ label, children }: { label: string; children: ReactNode }) {
