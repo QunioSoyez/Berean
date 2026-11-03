@@ -19,6 +19,7 @@ type Props = {
   onCopy: () => void;
   onShare: () => void;
   onClear: () => void;
+  onCommentary: () => void;
 };
 
 /** Bottom bar shown while verses are selected. */
@@ -33,6 +34,14 @@ export function SelectionBar(props: Props) {
           <Text style={styles.reference} numberOfLines={1}>
             {props.message ?? props.reference}
           </Text>
+          <Pressable
+            onPress={props.onCommentary}
+            accessibilityRole="button"
+            accessibilityLabel={`Commentary on ${props.reference}`}
+            hitSlop={8}
+            style={({ pressed }) => [styles.commentary, pressed && styles.pressed]}>
+            <Text style={styles.commentaryText}>Commentary</Text>
+          </Pressable>
           <Pressable
             onPress={props.onClear}
             accessibilityRole="button"
@@ -136,7 +145,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     gap: Spacing.three,
   },
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
+  commentary: {
+    paddingHorizontal: Spacing.two + 2,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+  },
+  commentaryText: { fontSize: 13, fontWeight: '700', color: Colors.navy, fontFamily: Fonts.sans },
   reference: {
     flex: 1,
     fontSize: 15,

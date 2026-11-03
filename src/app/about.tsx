@@ -46,6 +46,12 @@ export default function AboutScreen() {
         under Crown patent.
       </Para>
 
+      <Heading>Commentary</Heading>
+      <Para>
+        Matthew Henry’s Concise Commentary on the Whole Bible — public domain. Source: the CrossWire
+        Bible Society’s SWORD module “MHCC” (from the Christian Classics Ethereal Library text).
+      </Para>
+
       <Heading>Built with</Heading>
       <Para>Expo, React Native and Expo Router — open-source software under the MIT License.</Para>
     </InfoPage>

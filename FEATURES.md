@@ -64,10 +64,14 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Search page in the menu and on the landing screen (replaces "coming soon")
 
 ## Round 6 — Commentary (Matthew Henry)
-- [ ] Commentary framework that supports more public-domain resources later
-- [ ] Matthew Henry's Commentary (Complete) bundled *(PRD: preloaded notes)*
-- [ ] Commentary indicator on verses/chapters; open in a panel or sheet
-- [ ] Room for more: Treasury of Scripture Knowledge, JFB, Geneva notes, etc.
+- [x] Matthew Henry's Concise Commentary bundled, works offline *(PRD: preloaded notes)*
+- [x] Build script (`npm run build:commentary`) converts the CrossWire MHCC module
+- [x] Commentary tab in the pop-out panel (next to My notes); opens from the chapter heading or the selection bar
+- [x] Jumps to the section covering the selected verse; chapter outline jumps to sections
+- [x] Book introduction ("About Genesis") on chapter 1
+- [x] Cross-references in the commentary are tappable and open that passage
+- [x] Wide screens: drag the panel's left edge to resize it (remembered; double-click/tap the edge to reset)
+- [ ] Room for more: Matthew Henry Complete, Treasury of Scripture Knowledge, JFB, Geneva notes, etc.
 
 ## Round 7 — Compare versions
 - [ ] Side-by-side or verse-by-verse comparison of 2+ versions *(PRD)*
@@ -82,7 +86,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] Graceful handling of local save failures *(PRD)*
 
 ## Round 9 — Launch
-- [ ] Web app on its own domain: https://bereanbible.live (www redirects; old workers.dev address off)
+- [x] Web app on its own domain: https://bereanbible.live (www redirects; old workers.dev address off)
 - [ ] EAS builds; App Store and Google Play listings
 - [ ] Privacy policy page (no data collected)
 

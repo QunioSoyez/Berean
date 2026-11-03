@@ -30,6 +30,7 @@ Then press `w` for web, or scan the QR code with **Expo Go** on your phone.
 | `npm run web` | Start and open in the browser |
 | `npm run typecheck` | TypeScript check |
 | `npm run build:bibles` | Rebuild the bundled Bible text in `assets/bibles/` |
+| `npm run build:commentary` | Rebuild Matthew Henry's commentary in `assets/commentary/` from `../reference/MHCC.zip` |
 | `npm run export:web` | Build the static web app into `dist/` |
 
 ## Project layout
@@ -42,7 +43,9 @@ src/constants/  Theme (colors, fonts, spacing)
 src/state/      Saved app state (last position)
 src/userdata/   Your data: highlights, bookmarks, notes — SQLite on phones, browser storage on web
 assets/bibles/  Bundled Bible text, one .bjson file per book (generated)
-scripts/        Build scripts (Bible data)
+assets/commentary/ Bundled Matthew Henry's Concise Commentary, one .bjson per book (generated)
+src/commentary/ Commentary loading
+scripts/        Build scripts (Bible text, commentary)
 ```
 
 ## Web deploy (Cloudflare)

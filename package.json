@@ -12,6 +12,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "build:bibles": "node scripts/build-bibles.mjs",
+    "build:commentary": "node scripts/build-commentary.mjs",
     "export:web": "expo export --platform web"
   },
   "dependencies": {

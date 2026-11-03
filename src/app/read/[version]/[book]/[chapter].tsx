@@ -23,11 +23,12 @@ import { AppMenu } from '@/components/app-menu';
 import { BookmarkDialog } from '@/components/bookmark-dialog';
 import { BookPicker } from '@/components/book-picker';
 import { ChapterText } from '@/components/chapter-text';
-import { NotesPanel } from '@/components/notes-panel';
+import { CommentaryView } from '@/components/commentary-view';
+import { NotesPanel, type PanelTab } from '@/components/notes-panel';
 import { SelectionBar } from '@/components/selection-bar';
 import { VersionPicker } from '@/components/version-picker';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
-import { goHome } from '@/navigation';
+import { chapterHref, goHome } from '@/navigation';
 import { shareText } from '@/share-text';
 import { saveLastPosition } from '@/state/last-position';
 import { bookmarkTitle, defaultBookmarkLabel } from '@/userdata/bookmark-types';
@@ -95,9 +96,11 @@ function Reader({
   const bm = useChapterBookmarks(book, chapter);
   const [bookmarkDialogOpen, setBookmarkDialogOpen] = useState(false);
   const nt = useChapterNotes(book, chapter);
-  const [notesPanel, setNotesPanel] = useState<{ verses: number[]; compose: boolean } | null>(
-    openNotes && focus.length ? { verses: focus, compose: false } : null,
-  );
+  const [notesPanel, setNotesPanel] = useState<{
+    verses: number[];
+    compose: boolean;
+    tab: PanelTab;
+  } | null>(openNotes && focus.length ? { verses: focus, compose: false, tab: 'notes' } : null);
   const [knownTags, setKnownTags] = useState<string[]>([]);
   const { width } = useWindowDimensions();
   const wide = width >= WIDE_LAYOUT;
@@ -202,13 +205,24 @@ function Reader({
   useEffect(() => {
     if (panelOpen) listAllTags().then(setKnownTags).catch(() => {});
   }, [panelOpen]);
-  const panelNotes = notesPanel ? nt.notes.filter((n) => noteCovers(n, notesPanel.verses)) : [];
+  const panelNotes = notesPanel
+    ? notesPanel.verses.length
+      ? nt.notes.filter((n) => noteCovers(n, notesPanel.verses))
+      : nt.notes // no verse picked → every note in the chapter
+    : [];
+  const openCommentary = () => {
+    setNotesPanel({ verses: selectedVerses, compose: false, tab: 'commentary' });
+    clearSelection();
+  };
   const afterNoteChange = async (ok: boolean) => {
     if (ok) listAllTags().then(setKnownTags).catch(() => {});
     return ok;
   };
 
   const toggleVerse = useCallback((verse: number) => {
+    // With the commentary open beside the text (wide screens), tapping a verse also moves
+    // the commentary to that verse's section.
+    setNotesPanel((p) => (p && p.tab === 'commentary' ? { ...p, verses: [verse] } : p));
     setSelected((prevSel) => {
       const next = new Set(prevSel);
       if (next.has(verse)) next.delete(verse);
@@ -262,7 +276,7 @@ function Reader({
     clearSelection();
   };
   const onNote = () => {
-    setNotesPanel({ verses: selectedVerses, compose: true });
+    setNotesPanel({ verses: selectedVerses, compose: true, tab: 'notes' });
     clearSelection();
   };
   const onCopy = async () => {
@@ -361,9 +375,22 @@ function Reader({
         style={styles.scrollView}
         contentContainerStyle={[styles.scroll, selected.size > 0 && styles.scrollWithBar]}>
         <View style={styles.column}>
-          <Text style={styles.chapterHeading} accessibilityRole="header">
-            {title}
-          </Text>
+          <View style={styles.headingRow}>
+            <Text style={styles.chapterHeading} accessibilityRole="header">
+              {title}
+            </Text>
+            <Pressable
+              onPress={openCommentary}
+              accessibilityRole="button"
+              accessibilityLabel={
+                selectedVerses.length
+                  ? `Commentary on ${formatReference(book, chapter, selectedVerses)}`
+                  : `Commentary on ${title}`
+              }
+              style={({ pressed }) => [styles.commentaryButton, pressed && styles.pressed]}>
+              <Text style={styles.commentaryButtonText}>Commentary</Text>
+            </Pressable>
+          </View>
 
           {state.status === 'loading' && (
             <ActivityIndicator style={styles.status} color={Colors.navy} />
@@ -390,7 +417,7 @@ function Reader({
                 focused={focused}
                 noteCounts={nt.counts}
                 onToggleVerse={toggleVerse}
-                onOpenNotes={(v) => setNotesPanel({ verses: [v], compose: false })}
+                onOpenNotes={(v) => setNotesPanel({ verses: [v], compose: false, tab: 'notes' })}
                 onVerseLayout={onVerseLayout}
               />
             </View>
@@ -414,6 +441,16 @@ function Reader({
           book={book}
           chapter={chapter}
           verses={notesPanel.verses}
+          tab={notesPanel.tab}
+          onTabChange={(tab) => setNotesPanel({ ...notesPanel, tab, compose: false })}
+          commentary={
+            <CommentaryView
+              book={book}
+              chapter={chapter}
+              verse={notesPanel.verses[0]}
+              onOpenRef={(b, c, v) => router.push(chapterHref(version, b, c, v))}
+            />
+          }
           notes={panelNotes}
           knownTags={knownTags}
           startComposing={notesPanel.compose}
@@ -438,6 +475,7 @@ function Reader({
           bookmarked={!!existingBookmark}
           onBookmark={() => setBookmarkDialogOpen(true)}
           onNote={onNote}
+          onCommentary={openCommentary}
           message={message}
           onHighlight={onHighlight}
           onRemoveHighlight={onRemoveHighlight}
@@ -579,14 +617,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
   },
+  headingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+    marginBottom: Spacing.three,
+    marginLeft: 30,
+  },
   chapterHeading: {
+    flexShrink: 1,
     fontSize: 28,
     fontWeight: '700',
     color: Colors.text,
     fontFamily: Fonts.serif,
-    marginBottom: Spacing.three,
-    marginLeft: 30,
   },
+  commentaryButton: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+  },
+  commentaryButtonText: { fontSize: 14, fontWeight: '700', color: Colors.navy, fontFamily: Fonts.sans },
   status: { paddingVertical: Spacing.six, alignItems: 'center' },
   errorText: { fontSize: 16, color: Colors.danger, marginBottom: Spacing.three },
   retry: {
