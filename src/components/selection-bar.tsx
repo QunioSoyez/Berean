@@ -20,6 +20,8 @@ type Props = {
   onShare: () => void;
   onClear: () => void;
   onCommentary: () => void;
+  /** Label for the commentary button ("Commentary", or "Estudio" for the NTBT). */
+  studyLabel?: string;
 };
 
 /** Bottom bar shown while verses are selected. */
@@ -37,10 +39,10 @@ export function SelectionBar(props: Props) {
           <Pressable
             onPress={props.onCommentary}
             accessibilityRole="button"
-            accessibilityLabel={`Commentary on ${props.reference}`}
+            accessibilityLabel={`${props.studyLabel ?? 'Commentary'} on ${props.reference}`}
             hitSlop={8}
             style={({ pressed }) => [styles.commentary, pressed && styles.pressed]}>
-            <Text style={styles.commentaryText}>Commentary</Text>
+            <Text style={styles.commentaryText}>{props.studyLabel ?? 'Commentary'}</Text>
           </Pressable>
           <Pressable
             onPress={props.onClear}

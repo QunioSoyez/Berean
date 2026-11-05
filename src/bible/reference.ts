@@ -1,4 +1,4 @@
-import { getBook } from './books';
+import { bookName } from './books';
 
 /** [1,2,3,5,7,8] → "1–3, 5, 7–8" */
 export function formatVerseList(verses: number[]): string {
@@ -19,9 +19,14 @@ export function formatVerseList(verses: number[]): string {
   return parts.join(', ');
 }
 
-/** "John 3:16–17" */
-export function formatReference(book: string, chapter: number, verses: number[]): string {
-  const name = getBook(book)?.name ?? book;
+/** "John 3:16–17" ("Juan 3:16–17" when `version` is the NTBT) */
+export function formatReference(
+  book: string,
+  chapter: number,
+  verses: number[],
+  version?: string,
+): string {
+  const name = bookName(book, version);
   return verses.length ? `${name} ${chapter}:${formatVerseList(verses)}` : `${name} ${chapter}`;
 }
 
@@ -47,6 +52,7 @@ export function formatPassageForSharing(
     book,
     chapter,
     sorted.map((v) => v.verse),
+    versionAbbr,
   );
   return `${body}\n— ${ref} (${versionAbbr})`;
 }

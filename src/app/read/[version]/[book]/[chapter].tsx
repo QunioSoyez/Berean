@@ -4,6 +4,7 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -15,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { getBook, nextChapter, prevChapter, type ChapterRef } from '@/bible/books';
+import { bookName, getBook, nextChapter, prevChapter, type ChapterRef } from '@/bible/books';
 import { formatPassageForSharing, formatReference } from '@/bible/reference';
 import { useChapter } from '@/bible/use-chapter';
 import { getVersion } from '@/bible/versions';
@@ -24,6 +25,7 @@ import { BookmarkDialog } from '@/components/bookmark-dialog';
 import { BookPicker } from '@/components/book-picker';
 import { ChapterText } from '@/components/chapter-text';
 import { CommentaryView } from '@/components/commentary-view';
+import { NtbtStudyView } from '@/components/ntbt-study-view';
 import { NotesPanel, type PanelTab } from '@/components/notes-panel';
 import { SelectionBar } from '@/components/selection-bar';
 import { VersionPicker } from '@/components/version-picker';
@@ -84,7 +86,6 @@ function Reader({
   /** Open the notes panel for the focus verses (from the Notes page). */
   openNotes: boolean;
 }) {
-  const bookInfo = getBook(book)!;
   const versionInfo = getVersion(version)!;
   const state = useChapter(version, book, chapter);
   const [bookPickerOpen, setBookPickerOpen] = useState(false);
@@ -242,7 +243,7 @@ function Reader({
     setBookmarkDialogOpen(false);
     const ok = await bm.save(selectedVerses, label);
     if (ok) {
-      const title = label ?? defaultBookmarkLabel(book, chapter, selectedVerses);
+      const title = label ?? defaultBookmarkLabel(book, chapter, selectedVerses, version);
       clearSelection();
       flash(existingBookmark ? 'Bookmark updated' : `Bookmarked: ${title}`);
     }
@@ -253,7 +254,7 @@ function Reader({
     const ok = await bm.remove(existingBookmark.id);
     if (ok) {
       clearSelection();
-      flash(`Removed bookmark: ${bookmarkTitle(existingBookmark)}`);
+      flash(`Removed bookmark: ${bookmarkTitle(existingBookmark, version)}`);
     }
   };
 
@@ -328,7 +329,9 @@ function Reader({
     return () => window.removeEventListener('keydown', onKey);
   }, [go, prev, next, bookPickerOpen, versionPickerOpen, bookmarkDialogOpen, clearSelection]);
 
-  const title = `${bookInfo.name} ${chapter}`;
+  const title = `${bookName(book, version)} ${chapter}`;
+  const openRef = (b: string, c: number, v: number[]) => router.push(chapterHref(version, b, c, v));
+  const studyButton = versionInfo.study === 'ntbt' ? 'Estudio' : 'Commentary';
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
@@ -384,11 +387,11 @@ function Reader({
               accessibilityRole="button"
               accessibilityLabel={
                 selectedVerses.length
-                  ? `Commentary on ${formatReference(book, chapter, selectedVerses)}`
-                  : `Commentary on ${title}`
+                  ? `${studyButton} on ${formatReference(book, chapter, selectedVerses, version)}`
+                  : `${studyButton} on ${title}`
               }
               style={({ pressed }) => [styles.commentaryButton, pressed && styles.pressed]}>
-              <Text style={styles.commentaryButtonText}>Commentary</Text>
+              <Text style={styles.commentaryButtonText}>{studyButton}</Text>
             </Pressable>
           </View>
 
@@ -411,6 +414,8 @@ function Reader({
               }}>
               <ChapterText
                 verses={state.verses}
+                headings={state.headings}
+                onOpenRef={openRef}
                 highlights={hl.highlights}
                 selected={selected}
                 bookmarked={bm.bookmarkedVerses}
@@ -425,13 +430,26 @@ function Reader({
 
           {/* Previous / next */}
           <View style={styles.nav}>
-            <NavButton label="‹ Previous" target={prev} onPress={go} align="left" />
-            <NavButton label="Next ›" target={next} onPress={go} align="right" />
+            <NavButton label="‹ Previous" target={prev} onPress={go} align="left" version={version} />
+            <NavButton label="Next ›" target={next} onPress={go} align="right" version={version} />
           </View>
 
-          <Text style={styles.copyright}>
-            {versionInfo.name}. {versionInfo.copyright}
-          </Text>
+          {versionInfo.creditUrl ? (
+            // Licensed text (NTBT): the official credit, with a working link to the publisher.
+            <Text style={styles.copyright}>
+              {versionInfo.copyright}{' '}
+              <Text
+                style={styles.creditLink}
+                onPress={() => Linking.openURL(versionInfo.creditUrl!)}
+                accessibilityRole="link">
+                {versionInfo.creditUrl.replace(/^https?:\/\//, '')}
+              </Text>
+            </Text>
+          ) : (
+            <Text style={styles.copyright}>
+              {versionInfo.name}. {versionInfo.copyright}
+            </Text>
+          )}
         </View>
       </ScrollView>
 
@@ -443,13 +461,19 @@ function Reader({
           verses={notesPanel.verses}
           tab={notesPanel.tab}
           onTabChange={(tab) => setNotesPanel({ ...notesPanel, tab, compose: false })}
+          version={version}
+          studyLabel={versionInfo.study === 'ntbt' ? 'Estudio NTBT' : 'Commentary'}
           commentary={
-            <CommentaryView
-              book={book}
-              chapter={chapter}
-              verse={notesPanel.verses[0]}
-              onOpenRef={(b, c, v) => router.push(chapterHref(version, b, c, v))}
-            />
+            versionInfo.study === 'ntbt' ? (
+              <NtbtStudyView book={book} chapter={chapter} verse={notesPanel.verses[0]} onOpenRef={openRef} />
+            ) : (
+              <CommentaryView
+                book={book}
+                chapter={chapter}
+                verse={notesPanel.verses[0]}
+                onOpenRef={openRef}
+              />
+            )
           }
           notes={panelNotes}
           knownTags={knownTags}
@@ -469,13 +493,14 @@ function Reader({
       )}
       {selected.size > 0 && (
         <SelectionBar
-          reference={formatReference(book, chapter, selectedVerses)}
+          reference={formatReference(book, chapter, selectedVerses, version)}
           currentColor={currentColor}
           anyHighlighted={anyHighlighted}
           bookmarked={!!existingBookmark}
           onBookmark={() => setBookmarkDialogOpen(true)}
           onNote={onNote}
           onCommentary={openCommentary}
+          studyLabel={studyButton}
           message={message}
           onHighlight={onHighlight}
           onRemoveHighlight={onRemoveHighlight}
@@ -488,8 +513,8 @@ function Reader({
       <BookmarkDialog
         visible={bookmarkDialogOpen}
         editing={!!existingBookmark}
-        reference={`${formatReference(book, chapter, selectedVerses)} (${versionInfo.abbr})`}
-        defaultLabel={defaultBookmarkLabel(book, chapter, selectedVerses)}
+        reference={`${formatReference(book, chapter, selectedVerses, version)} (${versionInfo.abbr})`}
+        defaultLabel={defaultBookmarkLabel(book, chapter, selectedVerses, version)}
         initialLabel={existingBookmark?.label ?? null}
         onCancel={() => setBookmarkDialogOpen(false)}
         onSave={onSaveBookmark}
@@ -497,6 +522,7 @@ function Reader({
       />
 
       <BookPicker
+        version={version}
         visible={bookPickerOpen}
         currentBook={book}
         currentChapter={chapter}
@@ -524,19 +550,23 @@ function NavButton({
   target,
   onPress,
   align,
+  version,
 }: {
   label: string;
   target: ChapterRef | undefined;
   onPress: (to: ChapterRef) => void;
   align: 'left' | 'right';
+  version: string;
 }) {
   if (!target) return <View style={styles.navSpacer} />;
   const book = getBook(target.book)!;
+  const name = bookName(target.book, version);
+  const short = getVersion(version)?.lang === 'es' ? name : book.abbr;
   return (
     <Pressable
       onPress={() => onPress(target)}
       accessibilityRole="button"
-      accessibilityLabel={`${align === 'left' ? 'Previous' : 'Next'} chapter, ${book.name} ${target.chapter}`}
+      accessibilityLabel={`${align === 'left' ? 'Previous' : 'Next'} chapter, ${name} ${target.chapter}`}
       style={({ pressed }) => [
         styles.navButton,
         align === 'right' && styles.navButtonRight,
@@ -544,7 +574,7 @@ function NavButton({
       ]}>
       <Text style={styles.navLabel}>{label}</Text>
       <Text style={styles.navTarget}>
-        {book.abbr} {target.chapter}
+        {short} {target.chapter}
       </Text>
     </Pressable>
   );
@@ -665,6 +695,7 @@ const styles = StyleSheet.create({
   navButtonRight: { alignItems: 'flex-end' },
   navLabel: { fontSize: 15, fontWeight: '700', color: Colors.navy, fontFamily: Fonts.sans },
   navTarget: { fontSize: 13, color: Colors.textSecondary, marginTop: 2, fontFamily: Fonts.sans },
+  creditLink: { color: Colors.navy, textDecorationLine: 'underline' },
   copyright: {
     marginTop: Spacing.four,
     fontSize: 12,

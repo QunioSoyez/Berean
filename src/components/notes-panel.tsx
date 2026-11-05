@@ -133,6 +133,10 @@ type Props = {
   onTabChange: (tab: PanelTab) => void;
   /** Contents of the Commentary tab (has its own scrolling). */
   commentary: ReactNode;
+  /** Label for that tab ("Commentary", or "Estudio NTBT" for the NTBT). */
+  studyLabel?: string;
+  /** Bible version being read — book names follow its language. */
+  version?: string;
   book: string;
   chapter: number;
   /** The verse(s) the panel is about. Empty = the whole chapter (no verse picked). */
@@ -168,7 +172,7 @@ export function NotesPanel(props: Props) {
     return () => clearTimeout(t);
   }, [confirmId]);
 
-  const reference = formatReference(props.book, props.chapter, props.verses);
+  const reference = formatReference(props.book, props.chapter, props.verses, props.version);
   const resize = useResizableWidth(props.mode === 'docked');
 
   const panel = (
@@ -196,7 +200,7 @@ export function NotesPanel(props: Props) {
             {(
               [
                 ['notes', 'My notes'],
-                ['commentary', 'Commentary'],
+                ['commentary', props.studyLabel ?? 'Commentary'],
               ] as const
             ).map(([id, label]) => {
               const active = props.tab === id;
@@ -262,7 +266,7 @@ export function NotesPanel(props: Props) {
           editingId === note.id ? (
             <View key={note.id} style={styles.card}>
               <Text style={styles.cardLabel}>
-                Editing · {formatReference(note.book, note.chapter, note.verses)}
+                Editing · {formatReference(note.book, note.chapter, note.verses, props.version)}
               </Text>
               <NoteEditor
                 initial={{ body: note.body, tags: note.tags }}
@@ -276,7 +280,7 @@ export function NotesPanel(props: Props) {
           ) : (
             <View key={note.id} style={styles.card}>
               <Text style={styles.cardLabel}>
-                {formatReference(note.book, note.chapter, note.verses)} ·{' '}
+                {formatReference(note.book, note.chapter, note.verses, props.version)} ·{' '}
                 {new Date(note.updatedAt).toLocaleDateString(undefined, {
                   month: 'short',
                   day: 'numeric',

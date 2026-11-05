@@ -15,3 +15,12 @@ Book ids are USFM codes (GEN, EXO … REV).
 
 \* The KJV is public domain everywhere except the United Kingdom, where it is under
 Crown patent.
+
+## NTBT (Spanish)
+
+Built separately by `npm run build:ntbt` from the NTBT study edition JSON
+(https://cdn.bibliatodo.com/ntbt/estudio/NTBT-json.zip). Format: `ntbt/<BOOK>.bjson` =
+`{ v: string[][], h: { chapter: { verse: Heading[] } } }` — the same verse arrays plus section
+headings. **Not public domain:** © BibliaTodo LLC, used with permission; see `ntbt/LICENCIA.txt`
+and `ntbt/CREDITOS.txt`. NTBT numbering differs from the KJV in Psalm 47 (10 verses) and 3 John
+(15 verses).

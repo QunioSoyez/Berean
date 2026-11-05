@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { loadChapter } from './load';
+import { loadChapter, type Heading } from './load';
 
 type State =
   | { status: 'loading' }
-  | { status: 'ready'; verses: string[] }
+  | { status: 'ready'; verses: string[]; headings: Record<string, Heading[]> }
   | { status: 'error'; message: string };
 
 export function useChapter(version: string, book: string, chapter: number) {
@@ -15,7 +15,7 @@ export function useChapter(version: string, book: string, chapter: number) {
     let cancelled = false;
     setState({ status: 'loading' });
     loadChapter(version, book, chapter)
-      .then((verses) => !cancelled && setState({ status: 'ready', verses }))
+      .then((c) => !cancelled && setState({ status: 'ready', verses: c.verses, headings: c.headings }))
       .catch((e: unknown) => {
         if (!cancelled) setState({ status: 'error', message: e instanceof Error ? e.message : String(e) });
       });

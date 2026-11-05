@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { BOOKS, type Book } from '@/bible/books';
+import { BOOKS, bookName, type Book } from '@/bible/books';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 
 import { Sheet } from './sheet';
@@ -12,9 +12,11 @@ type Props = {
   currentChapter: number;
   onClose: () => void;
   onSelect: (book: string, chapter: number) => void;
+  /** Bible version being read — book names follow its language. */
+  version?: string;
 };
 
-export function BookPicker({ visible, currentBook, currentChapter, onClose, onSelect }: Props) {
+export function BookPicker({ visible, currentBook, currentChapter, onClose, onSelect, version }: Props) {
   const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState<string | null>(currentBook);
 
@@ -29,10 +31,15 @@ export function BookPicker({ visible, currentBook, currentChapter, onClose, onSe
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return BOOKS;
+    const fold = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const fq = fold(q);
     return BOOKS.filter(
-      (b) => b.name.toLowerCase().includes(q) || b.abbr.toLowerCase().startsWith(q),
+      (b) =>
+        fold(bookName(b.id, version)).includes(fq) ||
+        b.name.toLowerCase().includes(q) ||
+        b.abbr.toLowerCase().startsWith(q),
     );
-  }, [query]);
+  }, [query, version]);
 
   const onBookPress = (book: Book) => {
     if (book.chapters === 1) onSelect(book.id, 1);
@@ -79,7 +86,7 @@ export function BookPicker({ visible, currentBook, currentChapter, onClose, onSe
                       accessibilityRole="button"
                       accessibilityState={{ expanded: open }}
                       style={({ pressed }) => [styles.bookRow, pressed && styles.pressed]}>
-                      <Text style={[styles.bookName, isCurrent && styles.current]}>{book.name}</Text>
+                      <Text style={[styles.bookName, isCurrent && styles.current]}>{bookName(book.id, version)}</Text>
                       <Text style={styles.chapterCount}>
                         {book.chapters} {book.chapters === 1 ? 'chapter' : 'chapters'}
                       </Text>
@@ -93,7 +100,7 @@ export function BookPicker({ visible, currentBook, currentChapter, onClose, onSe
                               key={ch}
                               onPress={() => onSelect(book.id, ch)}
                               accessibilityRole="button"
-                              accessibilityLabel={`${book.name} chapter ${ch}`}
+                              accessibilityLabel={`${bookName(book.id, version)} chapter ${ch}`}
                               style={({ pressed }) => [
                                 styles.cell,
                                 selected && styles.cellSelected,

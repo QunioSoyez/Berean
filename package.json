@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "build:bibles": "node scripts/build-bibles.mjs",
     "build:commentary": "node scripts/build-commentary.mjs",
+    "build:ntbt": "node scripts/build-ntbt.mjs",
     "export:web": "expo export --platform web"
   },
   "dependencies": {

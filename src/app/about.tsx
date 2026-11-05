@@ -1,10 +1,11 @@
 import Constants from 'expo-constants';
 import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
 
+import { NTBT_EDITION } from '@/bible/ntbt.generated';
 import { VERSIONS } from '@/bible/versions';
 import { Heading, InfoPage, Para } from '@/components/info-page';
-import { Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 
 export default function AboutScreen() {
   const appVersion = Constants.expoConfig?.version ?? '';
@@ -35,7 +36,7 @@ export default function AboutScreen() {
       </Para>
 
       <Heading>Bible texts</Heading>
-      {VERSIONS.map((v) => (
+      {VERSIONS.filter((v) => !v.creditUrl).map((v) => (
         <Para key={v.id}>
           {v.name} ({v.abbr}
           {v.year ? `, ${v.year}` : ''}) — {v.copyright} Source: {v.source}.
@@ -44,6 +45,29 @@ export default function AboutScreen() {
       <Para small>
         The King James Version is public domain everywhere except the United Kingdom, where it is
         under Crown patent.
+      </Para>
+
+      <Heading>Nueva Traducción BibliaTodo (NTBT)</Heading>
+      <Para>
+        Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por{' '}
+        <Text style={styles.link} onPress={() => Linking.openURL(NTBT_URL)} accessibilityRole="link">
+          BibliaTodo Bible Society
+        </Text>
+        , sello editorial de BibliaTodo LLC.{' '}
+        <Text style={styles.link} onPress={() => Linking.openURL(NTBT_URL)} accessibilityRole="link">
+          https://www.bibliatodo.com/ntbt/
+        </Text>
+      </Para>
+      <Para small>
+        Texto español NTBT © 2026 BibliaTodo LLC, en lo relativo a sus aportaciones propias. Includes
+        the NTBT study edition (book introductions and study notes). Used with permission under the
+        free NTBT licence. Edition {NTBT_EDITION}.
+      </Para>
+      <Para small>
+        Textual bases consulted by the NTBT: Westminster Leningrad Codex (WLC) with Open Scriptures
+        Hebrew Bible (OSHB, CC BY 4.0); SBL Greek New Testament © 2010 Society of Biblical Literature
+        and Logos Bible Software (CC BY 4.0). These acknowledgments come from the NTBT credits; they
+        do not mean those organizations publish or endorse the translation.
       </Para>
 
       <Heading>Commentary</Heading>
@@ -58,7 +82,10 @@ export default function AboutScreen() {
   );
 }
 
+const NTBT_URL = 'https://www.bibliatodo.com/ntbt/';
+
 const styles = StyleSheet.create({
+  link: { color: Colors.navy, textDecorationLine: 'underline' },
   logoWrap: { alignItems: 'center', marginVertical: Spacing.three },
   logo: { width: 140, height: 140 },
 });

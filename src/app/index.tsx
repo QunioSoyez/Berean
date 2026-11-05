@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { getBook } from '@/bible/books';
+import { bookName, getBook } from '@/bible/books';
 import { getVersion, VERSIONS } from '@/bible/versions';
 import { AppMenu } from '@/components/app-menu';
 import { BookPicker } from '@/components/book-picker';
@@ -95,7 +95,7 @@ export default function Home() {
             style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
             <Text style={styles.primaryLabel}>{isFirstRun ? 'Start reading' : 'Continue reading'}</Text>
             <Text style={styles.primaryTarget}>
-              {book.name} {pos.chapter}
+              {bookName(book.id, version.id)} {pos.chapter}
             </Text>
           </Pressable>
 
@@ -108,6 +108,7 @@ export default function Home() {
       </ScrollView>
 
       <BookPicker
+        version={version.id}
         visible={bookPickerOpen}
         currentBook={book.id}
         currentChapter={pos.chapter}

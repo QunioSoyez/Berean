@@ -20,8 +20,10 @@ export default function LicenseScreen() {
 
       <Heading>Bible texts</Heading>
       <Para>
-        The bundled Bible versions are in the public domain and are not covered by the license
-        above. See About & credits for sources.
+        The Bible texts are not covered by the license above. KJV, WEB, ASV and YLT are in the public
+        domain. The Nueva Traducción BibliaTodo (NTBT) and its study notes are © BibliaTodo LLC and
+        are included with permission under the free NTBT licence, which requires their wording to be
+        kept exactly and their attribution shown. See About & credits for sources.
       </Para>
     </InfoPage>
   );

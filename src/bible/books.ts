@@ -3,6 +3,9 @@
  * `id` uses the standard USFM/Paratext 3-letter book codes so other data sources
  * (commentaries, cross-references) can be keyed against it later.
  */
+import { NTBT_BOOK_NAMES } from './ntbt.generated';
+import { getVersion } from './versions';
+
 export type Testament = 'OT' | 'NT';
 
 export type Book = {
@@ -84,6 +87,16 @@ export const BOOKS: readonly Book[] = [
 ];
 
 const BY_ID = new Map(BOOKS.map((b, i) => [b.id, { book: b, index: i }]));
+
+/**
+ * Book name in the language of a Bible version (English by default). The NTBT uses
+ * Spanish names (Génesis, Juan…); the app itself stays in English.
+ */
+export function bookName(id: string, version?: string): string {
+  const book = getBook(id);
+  if (version && getVersion(version)?.lang === 'es') return NTBT_BOOK_NAMES[book?.id ?? id] ?? book?.name ?? id;
+  return book?.name ?? id;
+}
 
 export function getBook(id: string | undefined): Book | undefined {
   return id ? BY_ID.get(id.toUpperCase())?.book : undefined;

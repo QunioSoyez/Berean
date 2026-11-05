@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { bookIndex, getBook } from '@/bible/books';
+import { bookIndex, bookName } from '@/bible/books';
 import { formatReference } from '@/bible/reference';
 import { ScreenHeader } from '@/components/screen-header';
 import { TagChip } from '@/components/tag-chip';
@@ -66,7 +66,7 @@ export default function NotesScreen() {
       if (tag && !n.tags.includes(tag)) return false;
       if (book && n.book !== book) return false;
       if (!q) return true;
-      const ref = formatReference(n.book, n.chapter, n.verses).toLowerCase();
+      const ref = formatReference(n.book, n.chapter, n.verses, version ?? undefined).toLowerCase();
       return (
         plainBody(n).toLowerCase().includes(q) || ref.includes(q) || n.tags.some((t) => t.includes(q))
       );
@@ -130,7 +130,7 @@ export default function NotesScreen() {
                         pressed && styles.pressed,
                       ]}>
                       <Text style={[styles.bookChipText, book === b && styles.bookChipTextActive]}>
-                        {getBook(b)?.name ?? b}
+                        {bookName(b, version ?? undefined)}
                       </Text>
                     </Pressable>
                   ))}
@@ -146,10 +146,10 @@ export default function NotesScreen() {
             <Pressable
               onPress={() => open(item)}
               accessibilityRole="button"
-              accessibilityLabel={`Note on ${formatReference(item.book, item.chapter, item.verses)}. Open`}
+              accessibilityLabel={`Note on ${formatReference(item.book, item.chapter, item.verses, version ?? undefined)}. Open`}
               style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
               <Text style={styles.reference}>
-                {formatReference(item.book, item.chapter, item.verses)}
+                {formatReference(item.book, item.chapter, item.verses, version ?? undefined)}
                 <Text style={styles.date}>
                   {'  ·  '}
                   {new Date(item.updatedAt).toLocaleDateString(undefined, {

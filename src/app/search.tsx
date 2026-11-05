@@ -127,9 +127,9 @@ export default function SearchScreen() {
                 version && router.push(chapterHref(version, item.book, item.chapter, [item.verse]))
               }
               accessibilityRole="button"
-              accessibilityLabel={`${formatReference(item.book, item.chapter, [item.verse])}. ${item.text}`}
+              accessibilityLabel={`${formatReference(item.book, item.chapter, [item.verse], version ?? undefined)}. ${item.text}`}
               style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-              <Text style={styles.reference}>{formatReference(item.book, item.chapter, [item.verse])}</Text>
+              <Text style={styles.reference}>{formatReference(item.book, item.chapter, [item.verse], version ?? undefined)}</Text>
               <Text style={styles.text}>
                 {splitForHighlight(item.text, result.terms).map((p, i) => (
                   <Text key={i} style={p.match ? styles.match : undefined}>

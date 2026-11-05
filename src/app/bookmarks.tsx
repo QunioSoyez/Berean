@@ -106,9 +106,9 @@ export default function BookmarksScreen() {
       <BookmarkDialog
         visible={!!editing}
         editing
-        reference={editing ? formatReference(editing.book, editing.chapter, editing.verses) : ''}
+        reference={editing ? formatReference(editing.book, editing.chapter, editing.verses, version ?? undefined) : ''}
         defaultLabel={
-          editing ? defaultBookmarkLabel(editing.book, editing.chapter, editing.verses) : ''
+          editing ? defaultBookmarkLabel(editing.book, editing.chapter, editing.verses, version ?? undefined) : ''
         }
         initialLabel={editing?.label ?? null}
         onCancel={() => setEditing(null)}
@@ -150,7 +150,7 @@ function BookmarkRow({
     if (!version) return;
     let cancelled = false;
     loadChapter(version, bookmark.book, bookmark.chapter)
-      .then((verses) => {
+      .then(({ verses }) => {
         if (cancelled) return;
         const text = bookmark.verses.map((v) => verses[v - 1]).filter(Boolean).join(' ');
         setPreview(text);
@@ -168,7 +168,7 @@ function BookmarkRow({
     return () => clearTimeout(t);
   }, [confirming]);
 
-  const reference = formatReference(bookmark.book, bookmark.chapter, bookmark.verses);
+  const reference = formatReference(bookmark.book, bookmark.chapter, bookmark.verses, version ?? undefined);
   const date = new Date(bookmark.createdAt).toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -180,12 +180,12 @@ function BookmarkRow({
       <Pressable
         onPress={onOpen}
         accessibilityRole="button"
-        accessibilityLabel={`${bookmarkTitle(bookmark)}, ${reference}. Open`}
+        accessibilityLabel={`${bookmarkTitle(bookmark, version ?? undefined)}, ${reference}. Open`}
         style={({ pressed }) => [styles.rowMain, pressed && styles.pressed]}>
         <View style={styles.rowMark} />
         <View style={styles.rowBody}>
           <Text style={styles.title} numberOfLines={1}>
-            {bookmarkTitle(bookmark)}
+            {bookmarkTitle(bookmark, version ?? undefined)}
           </Text>
           <Text style={styles.meta}>
             {reference}
@@ -202,7 +202,7 @@ function BookmarkRow({
         <Pressable
           onPress={onRename}
           accessibilityRole="button"
-          accessibilityLabel={`Rename ${bookmarkTitle(bookmark)}`}
+          accessibilityLabel={`Rename ${bookmarkTitle(bookmark, version ?? undefined)}`}
           hitSlop={6}
           style={({ pressed }) => [styles.actionBtn, pressed && styles.pressed]}>
           <Text style={styles.actionText}>Rename</Text>
@@ -211,7 +211,7 @@ function BookmarkRow({
           onPress={() => (confirming ? onDelete() : setConfirming(true))}
           accessibilityRole="button"
           accessibilityLabel={
-            confirming ? `Confirm delete ${bookmarkTitle(bookmark)}` : `Delete ${bookmarkTitle(bookmark)}`
+            confirming ? `Confirm delete ${bookmarkTitle(bookmark, version ?? undefined)}` : `Delete ${bookmarkTitle(bookmark, version ?? undefined)}`
           }
           hitSlop={6}
           style={({ pressed }) => [

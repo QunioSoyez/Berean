@@ -73,8 +73,14 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Wide screens: drag the panel's left edge to resize it (remembered; double-click/tap the edge to reset)
 - [ ] Room for more: Matthew Henry Complete, Treasury of Scripture Knowledge, JFB, Geneva notes, etc.
 
-## Round 7 — Compare versions
-- [ ] Side-by-side or verse-by-verse comparison of 2+ versions *(PRD)*
+## Round 7 — Spanish: NTBT (Nueva Traducción BibliaTodo)
+- [x] NTBT text built in (all 66 books) with its section headings, used with permission
+- [x] Spanish book names when reading the NTBT (app menus stay English)
+- [x] NTBT study edition: "Estudio NTBT" tab replaces Matthew Henry when reading the NTBT — book introductions + a note on every verse, with tappable verse links
+- [x] Study notes hosted on bereanbible.live and downloaded per chapter when opened (keeps the app small)
+- [x] Official NTBT credit with link under the chapter, in the study tab, and in About & credits (plus edition id and acknowledgments)
+- [x] Search ignores accents ("jesus" finds "Jesús")
+- [ ] Save downloaded study notes on the phone for offline reading
 
 ## Round 8 — Settings, polish & accessibility
 - [ ] Settings screen (in the menu)
@@ -91,6 +97,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] Privacy policy page (no data collected)
 
 ## Later / ideas
+- [ ] Compare versions side by side / verse by verse *(PRD — on hold)*
 - [ ] More public-domain versions (Darby, BBE, Webster, Geneva 1599…)
 - [ ] Optional download-on-demand for versions to keep the app small
 - [ ] Export / import notes (backup)

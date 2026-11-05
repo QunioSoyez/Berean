@@ -1,11 +1,20 @@
+import { Fragment } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import type { Heading } from '@/bible/load';
 
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { highlightSwatch } from '@/userdata/highlight-colors';
 import type { ChapterHighlights } from '@/userdata/highlights';
 
+import { RichRuns, type OpenRef } from './rich-text';
+
 type Props = {
   verses: string[];
+  /** Section headings shown above verses (NTBT): verse → headings. */
+  headings?: Record<string, Heading[]>;
+  /** Tap on a link inside a heading (parallel passages). */
+  onOpenRef?: OpenRef;
   highlights: ChapterHighlights;
   selected: ReadonlySet<number>;
   /** Verses covered by a bookmark — shown with a small gold marker. */
@@ -28,6 +37,8 @@ type Props = {
  */
 export function ChapterText({
   verses,
+  headings,
+  onOpenRef,
   highlights,
   selected,
   bookmarked,
@@ -50,9 +61,18 @@ export function ChapterText({
         const isBookmarked = bookmarked.has(verse);
         const isFocused = focused.has(verse);
         const noteCount = noteCounts.get(verse) ?? 0;
+        const heads = headings?.[String(verse)];
         return (
+          <Fragment key={verse}>
+          {heads?.map((h, hi) => (
+            <Text
+              key={`h${hi}`}
+              style={[styles.heading, HEADING_STYLES[h.k]]}
+              accessibilityRole={h.k === 'r' ? 'text' : 'header'}>
+              <RichRuns runs={h.t} onOpenRef={onOpenRef} />
+            </Text>
+          ))}
           <Pressable
-            key={verse}
             onPress={() => onToggleVerse(verse)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
@@ -85,6 +105,7 @@ export function ChapterText({
             </View>
             )}
           </Pressable>
+          </Fragment>
         );
       })}
     </View>
@@ -92,6 +113,34 @@ export function ChapterText({
 }
 
 const styles = StyleSheet.create({
+  heading: { marginLeft: 30, fontFamily: Fonts.sans },
+  headingMs: {
+    marginTop: Spacing.four,
+    marginBottom: Spacing.one,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: Colors.gold,
+  },
+  headingS1: {
+    marginTop: Spacing.three,
+    marginBottom: Spacing.one,
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: '700',
+    color: Colors.navy,
+    fontFamily: Fonts.serif,
+  },
+  headingS2: {
+    marginTop: Spacing.two,
+    marginBottom: Spacing.one,
+    fontSize: 15,
+    lineHeight: 21,
+    fontStyle: 'italic',
+    color: Colors.navy,
+  },
+  headingR: { marginBottom: Spacing.one, fontSize: 13, lineHeight: 19, color: Colors.textSecondary },
   row: {
     flexDirection: 'row',
     paddingVertical: 2,
@@ -150,3 +199,10 @@ const styles = StyleSheet.create({
     textDecorationColor: Colors.navy,
   },
 });
+
+const HEADING_STYLES = {
+  ms: styles.headingMs,
+  s1: styles.headingS1,
+  s2: styles.headingS2,
+  r: styles.headingR,
+} as const;

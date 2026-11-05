@@ -13,9 +13,22 @@ export type SearchResult = {
 
 export const MAX_RESULTS = 1000;
 
-/** Curly quotes/apostrophes → straight, lowercase, for forgiving matching. */
+/**
+ * Lowercase, straight quotes, and accents removed (á→a, ñ→n) so "jesus" finds "Jesús".
+ * Works character by character so the result has the same length as the input, which
+ * keeps highlight positions lined up with the original text.
+ */
 function normalize(s: string): string {
-  return s.toLowerCase().replace(/[‘’`]/g, "'").replace(/[“”]/g, '"');
+  let out = '';
+  for (const ch of s.toLowerCase()) {
+    if (ch === '‘' || ch === '’' || ch === '`') out += "'";
+    else if (ch === '“' || ch === '”') out += '"';
+    else {
+      const base = ch.normalize('NFD')[0];
+      out += ch.length === 1 && base ? base : ch;
+    }
+  }
+  return out;
 }
 
 const isWordChar = (c: string | undefined) => !!c && /[a-z0-9æ]/.test(c);
@@ -31,6 +44,7 @@ export function parseQuery(query: string): string[] {
   const q = normalize(query);
   while ((m = re.exec(q))) {
     const t = (m[1] ?? m[2]).replace(/^[^a-z0-9'æ]+|[^a-z0-9'æ]+$/g, '').trim();
+    // (the query was normalized above, so accented letters are already plain)
     if (t) terms.push(t);
   }
   return [...new Set(terms)];
@@ -75,7 +89,7 @@ export async function searchBible(
   for (let i = 0; i < BOOKS.length; i += 8) {
     const batch = BOOKS.slice(i, i + 8);
     const texts = await Promise.all(batch.map((b) => loadBook(version, b.id)));
-    texts.forEach((chapters, bi) => {
+    texts.forEach(({ chapters }, bi) => {
       const book = batch[bi].id;
       chapters.forEach((verses, ci) => {
         verses.forEach((text, vi) => {
