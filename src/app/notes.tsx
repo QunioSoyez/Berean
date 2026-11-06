@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { bookIndex, bookName } from '@/bible/books';
 import { formatReference } from '@/bible/reference';
+import { AdBanner } from '@/components/ad-banner';
 import { ScreenHeader } from '@/components/screen-header';
 import { TagChip } from '@/components/tag-chip';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
@@ -96,6 +97,7 @@ export default function NotesScreen() {
           data={filtered}
           keyExtractor={(n) => n.id}
           contentContainerStyle={styles.list}
+          ListFooterComponent={<AdBanner />}
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
             <View style={styles.filters}>

@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatReference } from '@/bible/reference';
 import { MAX_RESULTS, searchBible, splitForHighlight, type SearchResult } from '@/bible/search';
 import { getVersion } from '@/bible/versions';
+import { AdBanner } from '@/components/ad-banner';
 import { ScreenHeader } from '@/components/screen-header';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { chapterHref } from '@/navigation';
@@ -119,6 +120,7 @@ export default function SearchScreen() {
           data={result.hits}
           keyExtractor={(h) => `${h.book}.${h.chapter}.${h.verse}`}
           contentContainerStyle={styles.list}
+          ListFooterComponent={<AdBanner />}
           keyboardShouldPersistTaps="handled"
           initialNumToRender={20}
           renderItem={({ item }) => (

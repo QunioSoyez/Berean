@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { bookName, getBook } from '@/bible/books';
 import { getVersion, VERSIONS } from '@/bible/versions';
 import { AppMenu } from '@/components/app-menu';
+import { AdBanner } from '@/components/ad-banner';
 import { BookPicker } from '@/components/book-picker';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { chapterHref } from '@/navigation';
@@ -52,6 +53,13 @@ export default function Home() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
+      {/* Soft sky background (assets/images/home-clouds.jpg), behind everything on this screen. */}
+      <Image
+        source={require('@/assets/images/home-clouds.jpg')}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        accessible={false}
+      />
       <View style={styles.topBar}>
         <AppMenu />
       </View>
@@ -103,8 +111,11 @@ export default function Home() {
             <LinkButton label="Browse books" onPress={() => setBookPickerOpen(true)} />
             <LinkButton label="Bookmarks" href="/bookmarks" />
             <LinkButton label="Search" href="/search" />
+            <LinkButton label="Support Berean" href="/support" />
           </View>
         </View>
+        {/* Website only; renders nothing in the phone apps or until AdSense is set up. */}
+        <AdBanner />
       </ScrollView>
 
       <BookPicker
@@ -135,7 +146,7 @@ function LinkButton({ label, href, onPress }: { label: string; href?: Href; onPr
 
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  safe: { flex: 1, backgroundColor: Colors.background },
+  safe: { flex: 1, backgroundColor: '#DCE6F2' }, // shown for a moment before the clouds load
   topBar: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -162,6 +173,7 @@ const styles = StyleSheet.create({
   },
   versions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: Spacing.two },
   chip: {
+    backgroundColor: 'rgba(255,255,255,0.75)',
     minWidth: 64,
     paddingVertical: 10,
     paddingHorizontal: Spacing.three,

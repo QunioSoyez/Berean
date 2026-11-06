@@ -1,10 +1,12 @@
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 
 import { NTBT_EDITION } from '@/bible/ntbt.generated';
 import { VERSIONS } from '@/bible/versions';
 import { Heading, InfoPage, Para } from '@/components/info-page';
+import { CONTACT_EMAIL, PUBLISHER } from '@/constants/site';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function AboutScreen() {
@@ -32,7 +34,21 @@ export default function AboutScreen() {
 
       <Heading>Your privacy</Heading>
       <Para>
-        No account, no tracking, no analytics. Everything you save stays on this device.
+        No account and no analytics. Your highlights, bookmarks and notes stay on this device. The
+        website shows non-personalized Google ads to help with costs; the phone apps have no ads.{' '}
+        <Text style={styles.link} onPress={() => router.push('/privacy')} accessibilityRole="link">
+          Read the privacy policy
+        </Text>
+        .
+      </Para>
+
+      <Heading>Support Berean</Heading>
+      <Para>
+        Berean is made by {PUBLISHER}.{' '}
+        <Text style={styles.link} onPress={() => router.push('/support')} accessibilityRole="link">
+          Give through Ko-fi or Buy Me a Coffee
+        </Text>
+        , or send ideas and bug reports to {CONTACT_EMAIL}.
       </Para>
 
       <Heading>Bible texts</Heading>

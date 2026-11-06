@@ -82,6 +82,15 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Search ignores accents ("jesus" finds "Jesús")
 - [ ] Save downloaded study notes on the phone for offline reading
 
+## Funding — donations & website ads
+- [x] Support Berean page (menu + landing link) with Ko-fi and Buy Me a Coffee
+- [x] Privacy policy written for Mission CTRL (local-only data, non-personalized website ads, donations)
+- [x] About & credits privacy wording updated
+- [x] Ad spots ready on Home, Search, Bookmarks, Notes — website only, never in the reader, labeled "Advertisement"
+- [ ] Apply for Google AdSense with bereanbible.live
+- [ ] After approval: publisher ID + ad slot in src/ads/config.ts, ads.txt in public/
+- [ ] In AdSense: block sensitive categories; turn on the EEA/UK consent message
+
 ## Round 8 — Settings, polish & accessibility
 - [ ] Settings screen (in the menu)
 - [ ] Text size setting
@@ -94,7 +103,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 ## Round 9 — Launch
 - [x] Web app on its own domain: https://bereanbible.live (www redirects; old workers.dev address off)
 - [ ] EAS builds; App Store and Google Play listings
-- [ ] Privacy policy page (no data collected)
+- [x] Privacy policy page (menu → Privacy policy; https://bereanbible.live/privacy)
 
 ## Later / ideas
 - [ ] Compare versions side by side / verse by verse *(PRD — on hold)*

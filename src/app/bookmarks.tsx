@@ -7,6 +7,7 @@ import { loadChapter } from '@/bible/load';
 import { formatReference } from '@/bible/reference';
 import { getVersion } from '@/bible/versions';
 import { BookmarkDialog } from '@/components/bookmark-dialog';
+import { AdBanner } from '@/components/ad-banner';
 import { ScreenHeader } from '@/components/screen-header';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { chapterHref } from '@/navigation';
@@ -90,6 +91,7 @@ export default function BookmarksScreen() {
           data={items}
           keyExtractor={(b) => b.id}
           contentContainerStyle={styles.list}
+          ListFooterComponent={<AdBanner />}
           renderItem={({ item }) => (
             <BookmarkRow
               bookmark={item}
