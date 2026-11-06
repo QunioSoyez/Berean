@@ -19,6 +19,7 @@ import {
   type Para,
 } from '@/commentary/commentary';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { useFontScale } from '@/state/settings';
 
 type Props = {
   book: string;
@@ -37,6 +38,7 @@ export function CommentaryView({ book, chapter, verse, onOpenRef }: Props) {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const sectionY = useRef(new Map<number, number>());
   const listTop = useRef(0);
+  const fs = useFontScale(); // Settings → Text size
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +88,7 @@ export function CommentaryView({ book, chapter, verse, onOpenRef }: Props) {
             accessibilityRole="button"
             accessibilityState={{ expanded: showIntro }}
             style={({ pressed }) => pressed && styles.pressed}>
-            <Text style={styles.introToggle}>
+            <Text style={[styles.introToggle, fs(15)]}>
               {showIntro ? '▾' : '▸'} About {bookName}
             </Text>
           </Pressable>
@@ -105,7 +107,7 @@ export function CommentaryView({ book, chapter, verse, onOpenRef }: Props) {
                 onPress={() => scrollToSection(sectionForVerse(ch.sections, start))}
                 accessibilityRole="button"
                 style={({ pressed }) => [styles.outlineRow, pressed && styles.pressed]}>
-                <Text style={styles.outlineText}>{o.text}</Text>
+                <Text style={[styles.outlineText, fs(14, 20)]}>{o.text}</Text>
                 <Text style={styles.outlineVerses}>{o.verses}</Text>
               </Pressable>
             );
@@ -131,7 +133,7 @@ export function CommentaryView({ book, chapter, verse, onOpenRef }: Props) {
               }
             }}
             style={[styles.section, i === focusIndex && styles.sectionFocused]}>
-            <Text style={styles.sectionTitle} accessibilityRole="header">
+            <Text style={[styles.sectionTitle, fs(15)]} accessibilityRole="header">
               {s.title}
             </Text>
             {s.paras.map((p, pi) => (
@@ -147,8 +149,9 @@ export function CommentaryView({ book, chapter, verse, onOpenRef }: Props) {
 }
 
 function Paragraph({ para, onOpenRef }: { para: Para; onOpenRef: Props['onOpenRef'] }) {
+  const fs = useFontScale();
   return (
-    <Text style={styles.para} selectable>
+    <Text style={[styles.para, fs(16, 25)]} selectable>
       {para.map((r, i) => {
         if (typeof r === 'string') return r;
         const target = parseRef(r.ref);

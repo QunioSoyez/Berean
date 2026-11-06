@@ -63,5 +63,7 @@ export function useChapterBookmarks(book: string, chapter: number) {
     [reload],
   );
 
-  return { bookmarkedVerses, find, save, remove, error };
+  const clearError = useCallback(() => setError(null), []);
+
+  return { bookmarkedVerses, find, save, remove, error, clearError };
 }

@@ -9,6 +9,9 @@ import { Heading, InfoPage, Para } from '@/components/info-page';
 import { CONTACT_EMAIL, PUBLISHER } from '@/constants/site';
 import { Colors, Spacing } from '@/constants/theme';
 
+const FEATURES_URL = 'https://github.com/QunioSoyez/Berean/blob/main/FEATURES.md';
+const MAILTO = `mailto:${CONTACT_EMAIL}`;
+
 export default function AboutScreen() {
   const appVersion = Constants.expoConfig?.version ?? '';
 
@@ -32,6 +35,19 @@ export default function AboutScreen() {
       </Para>
       {appVersion ? <Para small>Version {appVersion}</Para> : null}
 
+      <Heading>What’s coming</Heading>
+      <Para>
+        See our{' '}
+        <Text style={styles.link} onPress={() => Linking.openURL(FEATURES_URL)} accessibilityRole="link">
+          Feature list
+        </Text>{' '}
+        for planned additions to the app. Please contact us with recommendations:{' '}
+        <Text style={styles.link} onPress={() => Linking.openURL(MAILTO)} accessibilityRole="link">
+          {CONTACT_EMAIL}
+        </Text>
+        .
+      </Para>
+
       <Heading>Your privacy</Heading>
       <Para>
         No account and no analytics. Your highlights, bookmarks and notes stay on this device. The
@@ -48,7 +64,11 @@ export default function AboutScreen() {
         <Text style={styles.link} onPress={() => router.push('/support')} accessibilityRole="link">
           Give through Ko-fi or Buy Me a Coffee
         </Text>
-        , or send ideas and bug reports to {CONTACT_EMAIL}.
+        , or send ideas and bug reports to{' '}
+        <Text style={styles.link} onPress={() => Linking.openURL(MAILTO)} accessibilityRole="link">
+          {CONTACT_EMAIL}
+        </Text>
+        .
       </Para>
 
       <Heading>Bible texts</Heading>

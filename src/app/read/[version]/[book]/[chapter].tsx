@@ -28,11 +28,13 @@ import { CommentaryView } from '@/components/commentary-view';
 import { NtbtStudyView } from '@/components/ntbt-study-view';
 import { NotesPanel, type PanelTab } from '@/components/notes-panel';
 import { SelectionBar } from '@/components/selection-bar';
+import { Tutorial } from '@/components/tutorial';
 import { VersionPicker } from '@/components/version-picker';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { chapterHref, goHome } from '@/navigation';
 import { shareText } from '@/share-text';
 import { saveLastPosition } from '@/state/last-position';
+import { useSettings } from '@/state/settings';
 import { bookmarkTitle, defaultBookmarkLabel } from '@/userdata/bookmark-types';
 import { noteCovers } from '@/userdata/note-types';
 import { useChapterBookmarks } from '@/userdata/use-chapter-bookmarks';
@@ -105,6 +107,9 @@ function Reader({
   const [knownTags, setKnownTags] = useState<string[]>([]);
   const { width } = useWindowDimensions();
   const wide = width >= WIDE_LAYOUT;
+  // First-run tutorial (also available from Settings).
+  const settings = useSettings();
+  const showTutorial = settings.loaded && !settings.tutorialSeen;
 
   // Scrolling to a bookmarked verse: remember where the text and each verse row sit.
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -178,20 +183,34 @@ function Reader({
   );
 
   // Short status line in the selection bar ("Copied", errors), cleared after a moment.
-  const flash = useCallback((text: string) => {
+  // Errors stay up longer so there's time to read them.
+  const flash = useCallback((text: string, ms = 2500) => {
     setMessage(text);
     if (messageTimer.current) clearTimeout(messageTimer.current);
-    messageTimer.current = setTimeout(() => setMessage(null), 2500);
+    messageTimer.current = setTimeout(() => setMessage(null), ms);
   }, []);
+  // Save/load errors from highlights, bookmarks and notes. Each is cleared once shown, so
+  // the same error appears again if it happens a second time.
+  const { error: hlError, clearError: clearHlError } = hl;
+  const { error: bmError, clearError: clearBmError } = bm;
+  const { error: ntError, clearError: clearNtError } = nt;
   useEffect(() => {
-    if (hl.error) flash(hl.error);
-  }, [hl.error, flash]);
+    if (!hlError) return;
+    flash(hlError, 5000);
+    clearHlError();
+  }, [hlError, clearHlError, flash]);
   useEffect(() => {
-    if (bm.error) flash(bm.error);
-  }, [bm.error, flash]);
+    if (!bmError) return;
+    flash(bmError, 5000);
+    clearBmError();
+  }, [bmError, clearBmError, flash]);
+  // Note errors: the notes panel shows its own message when it's open, so no toast then.
+  const notesPanelOpen = notesPanel !== null;
   useEffect(() => {
-    if (nt.error) flash(nt.error);
-  }, [nt.error, flash]);
+    if (!ntError) return;
+    if (!notesPanelOpen) flash(ntError, 5000);
+    clearNtError();
+  }, [ntError, clearNtError, flash, notesPanelOpen]);
 
   // Notes panel: close it when the chapter changes; load tag suggestions when it opens.
   const chapterKey = `${book}/${chapter}`;
@@ -509,6 +528,8 @@ function Reader({
           onClear={clearSelection}
         />
       )}
+
+      <Tutorial visible={showTutorial} onClose={() => settings.setTutorialSeen(true)} />
 
       <BookmarkDialog
         visible={bookmarkDialogOpen}

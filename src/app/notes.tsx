@@ -20,6 +20,7 @@ import { TagChip } from '@/components/tag-chip';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { chapterHref } from '@/navigation';
 import { getLastPosition } from '@/state/last-position';
+import { useFontScale } from '@/state/settings';
 import { stripMarkdown } from '@/notes-format/markdown';
 import type { Note } from '@/userdata/note-types';
 import { listNotes } from '@/userdata/notes';
@@ -32,6 +33,7 @@ export default function NotesScreen() {
   const [query, setQuery] = useState('');
   const [tag, setTag] = useState<string | null>(null);
   const [book, setBook] = useState<string | null>(null);
+  const fs = useFontScale(); // Settings → Text size
 
   useFocusEffect(
     useCallback(() => {
@@ -161,7 +163,7 @@ export default function NotesScreen() {
                   })}
                 </Text>
               </Text>
-              <Text style={styles.body} numberOfLines={4}>
+              <Text style={[styles.body, fs(16, 23)]} numberOfLines={4}>
                 {plainBody(item)}
               </Text>
               {item.tags.length > 0 && (

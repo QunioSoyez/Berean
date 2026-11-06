@@ -91,14 +91,12 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] After approval: publisher ID + ad slot in src/ads/config.ts, ads.txt in public/
 - [ ] In AdSense: block sensitive categories; turn on the EEA/UK consent message
 
-## Round 8 — Settings, polish & accessibility
-- [ ] Settings screen (in the menu)
-- [ ] Text size setting
-- [ ] Optional paragraph (flowing) layout
-- [ ] Swipe left/right to change chapter on phones
-- [ ] First-run tutorial on highlights, bookmarks and notes *(PRD)*
-- [ ] Screen reader + keyboard pass on all screens *(PRD)*
-- [ ] Graceful handling of local save failures *(PRD)*
+## Round 8 — Settings, tutorial & polish
+- [x] Settings screen (in the menu) — saved on each device
+- [x] Text size: Small, Medium, Large, Extra large — Bible text, notes and commentary, with a live preview
+- [x] First-run tutorial: 4 short cards (select, highlight, bookmark, notes & commentary); skippable, replay from Settings *(PRD)*
+- [x] Save failures: clear message every time; highlight changes roll back; a note that can't be saved stays in the editor with its text *(PRD)*
+- [x] About page: link to this feature list and the contact email
 
 ## Round 9 — Launch
 - [x] Web app on its own domain: https://bereanbible.live (www redirects; old workers.dev address off)
@@ -107,6 +105,9 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 
 ## Later / ideas
 - [ ] Compare versions side by side / verse by verse *(PRD — on hold)*
+- [ ] Swipe left/right to change chapter on phones
+- [ ] Screen reader + keyboard pass on all screens *(PRD)*
+- [ ] Save NTBT study notes on the phone for offline reading (see Round 7)
 - [ ] More public-domain versions (Darby, BBE, Webster, Geneva 1599…)
 - [ ] Optional download-on-demand for versions to keep the app small
 - [ ] Export / import notes (backup)

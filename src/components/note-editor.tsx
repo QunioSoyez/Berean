@@ -9,6 +9,7 @@ import {
   type Edit,
   type Selection,
 } from '@/notes-format/markdown';
+import { useFontScale } from '@/state/settings';
 import { cleanTag, MAX_TAGS, type NoteInput } from '@/userdata/note-types';
 
 import { NoteText } from './note-text';
@@ -26,6 +27,7 @@ type Props = {
 export function NoteEditor({ initial, knownTags, onSave, onCancel }: Props) {
   const [body, setBody] = useState(initial?.body ?? '');
   const [preview, setPreview] = useState(false);
+  const fs = useFontScale(); // Settings → Text size
   const inputRef = useRef<TextInputInstance>(null);
   // Where the cursor/selection is, so toolbar buttons know what to format.
   const sel = useRef<Selection>({ start: body.length, end: body.length });
@@ -142,7 +144,7 @@ export function NoteEditor({ initial, knownTags, onSave, onCancel }: Props) {
           }}
           placeholder="Write your note…"
           placeholderTextColor={Colors.textSecondary}
-          style={styles.body}
+          style={[styles.body, fs(16, 22)]}
           multiline
           autoFocus
           textAlignVertical="top"

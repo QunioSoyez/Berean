@@ -152,18 +152,23 @@ type Props = {
   onDelete: (id: string) => Promise<boolean>;
 };
 
+const SAVE_FAILED = 'Couldn’t save the note. Your text is still here — please try again.';
+
 /** Side panel with two tabs: My notes (add / edit / delete) and Commentary. */
 export function NotesPanel(props: Props) {
   const insets = useSafeAreaInsets();
   const [composing, setComposing] = useState(props.startComposing);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // Shown inside the panel when a save fails; the editor stays open with the text intact.
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const versesKey = props.verses.join(',');
   useEffect(() => {
     setComposing(props.startComposing);
     setEditingId(null);
     setConfirmId(null);
+    setSaveError(null);
   }, [versesKey, props.startComposing]);
 
   useEffect(() => {
@@ -232,6 +237,11 @@ export function NotesPanel(props: Props) {
         <View style={styles.flex}>{props.commentary}</View>
       ) : (
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+        {saveError && (
+          <Text style={styles.saveError} accessibilityRole="alert" accessibilityLiveRegion="assertive">
+            {saveError}
+          </Text>
+        )}
         {props.verses.length === 0 ? (
           <Text style={styles.hint}>Tap a verse, then Note, to add a note. Notes in this chapter:</Text>
         ) : composing ? (
@@ -239,9 +249,14 @@ export function NotesPanel(props: Props) {
             <Text style={styles.cardLabel}>New note · {reference}</Text>
             <NoteEditor
               knownTags={props.knownTags}
-              onCancel={() => setComposing(false)}
+              onCancel={() => {
+                setComposing(false);
+                setSaveError(null);
+              }}
               onSave={async (input) => {
-                if (await props.onAdd(input)) setComposing(false);
+                const ok = await props.onAdd(input);
+                setSaveError(ok ? null : SAVE_FAILED);
+                if (ok) setComposing(false);
               }}
             />
           </View>
@@ -271,9 +286,14 @@ export function NotesPanel(props: Props) {
               <NoteEditor
                 initial={{ body: note.body, tags: note.tags }}
                 knownTags={props.knownTags}
-                onCancel={() => setEditingId(null)}
+                onCancel={() => {
+                  setEditingId(null);
+                  setSaveError(null);
+                }}
                 onSave={async (input) => {
-                  if (await props.onEdit(note.id, input)) setEditingId(null);
+                  const ok = await props.onEdit(note.id, input);
+                  setSaveError(ok ? null : SAVE_FAILED);
+                  if (ok) setEditingId(null);
                 }}
               />
             </View>
@@ -308,7 +328,11 @@ export function NotesPanel(props: Props) {
                   <Text style={styles.actionText}>Edit</Text>
                 </Pressable>
                 <Pressable
-                  onPress={() => (confirmId === note.id ? props.onDelete(note.id) : setConfirmId(note.id))}
+                  onPress={async () => {
+                    if (confirmId !== note.id) return setConfirmId(note.id);
+                    const ok = await props.onDelete(note.id);
+                    setSaveError(ok ? null : 'Couldn’t delete the note. Please try again.');
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel={confirmId === note.id ? 'Confirm delete note' : 'Delete note'}
                   hitSlop={6}
@@ -410,6 +434,15 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: Colors.navy,
     alignItems: 'center',
+  },
+  saveError: {
+    color: Colors.danger,
+    backgroundColor: '#FDECEA',
+    borderRadius: 8,
+    padding: Spacing.two,
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: Fonts.sans,
   },
   addText: { fontSize: 15, fontWeight: '700', color: Colors.navy, fontFamily: Fonts.sans },
   empty: { color: Colors.textSecondary, textAlign: 'center', fontFamily: Fonts.sans },

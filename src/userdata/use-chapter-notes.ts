@@ -50,10 +50,13 @@ export function useChapterNotes(book: string, chapter: number) {
     [reload],
   );
 
+  const clearError = useCallback(() => setError(null), []);
+
   return {
     notes: list,
     counts,
     error,
+    clearError,
     add: (verses: number[], input: NoteInput) =>
       run(() => createNote(book, chapter, verses, input), 'Couldn’t save the note. Please try again.'),
     edit: (id: string, input: NoteInput) =>

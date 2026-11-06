@@ -47,10 +47,12 @@ export function useHighlights(book: string, chapter: number) {
     [book, chapter, map],
   );
 
+  const clearError = useCallback(() => setError(null), []);
+
   return {
     highlights: map,
     error,
-    clearError: () => setError(null),
+    clearError,
     highlight: (verses: number[], color: string) => apply(verses, color),
     unhighlight: (verses: number[]) => apply(verses, null),
   };

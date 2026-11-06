@@ -13,6 +13,7 @@ import {
 import { bookName } from '@/bible/books';
 import { loadNtbtIntro, loadNtbtNotes, type StudyBlock, type StudyNote } from '@/commentary/ntbt-study';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { useFontScale } from '@/state/settings';
 
 import { RichRuns, type OpenRef } from './rich-text';
 
@@ -36,6 +37,7 @@ export function NtbtStudyView({ book, chapter, verse, onOpenRef }: Props) {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const noteY = useRef(new Map<number, number>());
   const listTop = useRef(0);
+  const fs = useFontScale(); // Settings → Text size
 
   useEffect(() => {
     let cancelled = false;
@@ -95,7 +97,7 @@ export function NtbtStudyView({ book, chapter, verse, onOpenRef }: Props) {
             accessibilityRole="button"
             accessibilityState={{ expanded: showIntro }}
             style={({ pressed }) => pressed && styles.pressed}>
-            <Text style={styles.introToggle}>
+            <Text style={[styles.introToggle, fs(15)]}>
               {showIntro ? '▾' : '▸'} Introducción a {name}
             </Text>
           </Pressable>
@@ -115,7 +117,7 @@ export function NtbtStudyView({ book, chapter, verse, onOpenRef }: Props) {
               }
             }}
             style={[styles.note, n.v === verse && styles.noteFocused]}>
-            <Text style={styles.verseRef}>
+            <Text style={[styles.verseRef, fs(13)]}>
               {name} {chapter}:{n.v}
             </Text>
             <Blocks blocks={n.blocks} onOpenRef={onOpenRef} />
@@ -135,14 +137,16 @@ export function NtbtStudyView({ book, chapter, verse, onOpenRef }: Props) {
 }
 
 function Blocks({ blocks, onOpenRef }: { blocks: StudyBlock[]; onOpenRef: OpenRef }) {
+  const fs = useFontScale();
+  const p = [styles.p, fs(16, 25)];
   return (
     <View style={styles.blocks}>
       {blocks.map((b, i) => {
         if (b.k === 'li') {
           return (
             <View key={i} style={styles.li}>
-              <Text style={[styles.p, styles.marker]}>{b.n != null ? `${b.n}.` : '•'}</Text>
-              <Text style={[styles.p, styles.liText]} selectable>
+              <Text style={[...p, styles.marker]}>{b.n != null ? `${b.n}.` : '•'}</Text>
+              <Text style={[...p, styles.liText]} selectable>
                 <RichRuns runs={b.r} onOpenRef={onOpenRef} />
               </Text>
             </View>
@@ -151,7 +155,7 @@ function Blocks({ blocks, onOpenRef }: { blocks: StudyBlock[]; onOpenRef: OpenRe
         return (
           <Text
             key={i}
-            style={b.k === 'h2' ? styles.h2 : b.k === 'h3' ? styles.h3 : styles.p}
+            style={b.k === 'h2' ? [styles.h2, fs(17, 23)] : b.k === 'h3' ? [styles.h3, fs(14, 20)] : p}
             accessibilityRole={b.k === 'p' ? 'text' : 'header'}
             selectable>
             <RichRuns runs={b.r} onOpenRef={onOpenRef} />

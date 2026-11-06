@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Heading } from '@/bible/load';
 
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { useFontScale, useTextScale } from '@/state/settings';
 import { highlightSwatch } from '@/userdata/highlight-colors';
 import type { ChapterHighlights } from '@/userdata/highlights';
 
@@ -51,6 +52,16 @@ export function ChapterText({
   // Only reserve space for note markers when this chapter has notes, so phones keep
   // the full reading width otherwise.
   const showNoteGutter = noteCounts.size > 0;
+  // Text size setting (Settings → Text size).
+  const fs = useFontScale();
+  const scale = useTextScale();
+  const textSize = fs(19, 30);
+  const numberSize = fs(12);
+  const headingSize = { ms: fs(13), s1: fs(18, 24), s2: fs(15, 21), r: fs(13, 19) } as const;
+  // Keep the verse number lined up with the first line of text at every size.
+  const numberTop = { paddingTop: Math.round(6 * scale) };
+  const gutterWidth = { width: Math.round(27 * scale) };
+  const headingIndent = { marginLeft: 3 + gutterWidth.width }; // line up with the verse text
   return (
     <View>
       {verses.map((text, i) => {
@@ -67,7 +78,7 @@ export function ChapterText({
           {heads?.map((h, hi) => (
             <Text
               key={`h${hi}`}
-              style={[styles.heading, HEADING_STYLES[h.k]]}
+              style={[styles.heading, HEADING_STYLES[h.k], headingSize[h.k], headingIndent]}
               accessibilityRole={h.k === 'r' ? 'text' : 'header'}>
               <RichRuns runs={h.t} onOpenRef={onOpenRef} />
             </Text>
@@ -80,15 +91,15 @@ export function ChapterText({
             accessibilityHint={isSelected ? 'Tap to unselect' : 'Tap to select'}
             onLayout={onVerseLayout ? (e) => onVerseLayout(verse, e.nativeEvent.layout.y) : undefined}
             style={[styles.row, isFocused && styles.rowFocused, isSelected && styles.rowSelected]}>
-            <View style={styles.gutter}>
-              <Text style={[styles.number, isSelected && styles.numberSelected]}>{verse}</Text>
+            <View style={[styles.gutter, gutterWidth]}>
+              <Text style={[styles.number, numberSize, numberTop, isSelected && styles.numberSelected]}>{verse}</Text>
               {isBookmarked && <View style={styles.bookmarkMark} />}
             </View>
             <View style={[styles.textWrap, color ? { backgroundColor: highlightSwatch(color) } : null]}>
-              <Text style={[styles.text, isSelected && styles.textSelected]}>{text}</Text>
+              <Text style={[styles.text, textSize, isSelected && styles.textSelected]}>{text}</Text>
             </View>
             {showNoteGutter && (
-            <View style={styles.noteGutter}>
+            <View style={[styles.noteGutter, numberTop]}>
               {noteCount > 0 && (
                 <Pressable
                   onPress={(e) => {

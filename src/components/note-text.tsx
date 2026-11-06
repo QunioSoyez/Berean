@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { parseBlocks, type Inline } from '@/notes-format/markdown';
+import { useFontScale } from '@/state/settings';
 
 type Props = {
   body: string;
@@ -11,9 +12,13 @@ type Props = {
 
 /** Shows a note with its formatting: headings, bold/italic, bullet and numbered lists. */
 export function NoteText({ body, format }: Props) {
+  const fs = useFontScale(); // Settings → Text size
+  const text = [styles.text, fs(16, 23)];
+  const h1 = [styles.h1, fs(20, 27)];
+  const h2 = [styles.h2, fs(17, 24)];
   if (format === 'plain') {
     return (
-      <Text style={styles.text} selectable>
+      <Text style={text} selectable>
         {body}
       </Text>
     );
@@ -30,7 +35,7 @@ export function NoteText({ body, format }: Props) {
             return (
               <Text
                 key={i}
-                style={[styles.text, b.level === 1 ? styles.h1 : styles.h2]}
+                style={[...text, ...(b.level === 1 ? h1 : h2)]}
                 accessibilityRole="header"
                 selectable>
                 <Runs runs={b.content} />
@@ -39,8 +44,8 @@ export function NoteText({ body, format }: Props) {
           case 'bullet':
             return (
               <View key={i} style={styles.listRow}>
-                <Text style={[styles.text, styles.marker]}>•</Text>
-                <Text style={[styles.text, styles.listText]} selectable>
+                <Text style={[...text, styles.marker]}>•</Text>
+                <Text style={[...text, styles.listText]} selectable>
                   <Runs runs={b.content} />
                 </Text>
               </View>
@@ -48,15 +53,15 @@ export function NoteText({ body, format }: Props) {
           case 'number':
             return (
               <View key={i} style={styles.listRow}>
-                <Text style={[styles.text, styles.marker]}>{b.n}.</Text>
-                <Text style={[styles.text, styles.listText]} selectable>
+                <Text style={[...text, styles.marker]}>{b.n}.</Text>
+                <Text style={[...text, styles.listText]} selectable>
                   <Runs runs={b.content} />
                 </Text>
               </View>
             );
           default:
             return (
-              <Text key={i} style={styles.text} selectable>
+              <Text key={i} style={text} selectable>
                 <Runs runs={b.content} />
               </Text>
             );
