@@ -1,0 +1,28 @@
+# Dependabot version updates (Phase 1 step 3 of the AppSec pipeline).
+# Alerts + security updates are turned on by the QunioSoyez org security configuration.
+#
+# Expo app: npm dependencies are managed by the Expo SDK, so there is NO npm entry here.
+# (world-english-bible is pinned on purpose and updated by hand.)
+# - Routine npm upgrades: `npx expo install --check` (and `npx expo install` when moving SDKs).
+# - Vulnerable npm packages still get security-update PRs from Settings. Check them with
+#   `npx expo install --check` before merging (merging = production deploy).
+#
+# GitHub Actions pins (SHA + "# vX.Y.Z" comment, incl. the security-workflows pin):
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "20:00"
+      timezone: "America/New_York"
+    # Wait 7 days after a release before proposing it
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "deps(actions)"
