@@ -37,6 +37,7 @@ export function AppMenu({ onChangeVersion }: Props) {
     { label: 'Search', onPress: nav('/search') },
     { label: 'Bookmarks', onPress: nav('/bookmarks') },
     { label: 'Notes', onPress: nav('/notes') },
+    { label: 'Games', onPress: nav('/games') },
     { label: 'Settings', onPress: nav('/settings') },
     { label: 'Support Berean', onPress: nav('/support') },
     { label: 'About & credits', onPress: nav('/about') },

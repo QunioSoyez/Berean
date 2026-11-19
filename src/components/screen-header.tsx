@@ -3,7 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { goBackOrHome } from '@/navigation';
 
-/** Simple header with a back button for secondary screens. */
+import { AppMenu } from './app-menu';
+
+/** Header for secondary screens: back button, title, and the hamburger menu. */
 export function ScreenHeader({ title }: { title: string }) {
   return (
     <View style={styles.header}>
@@ -19,7 +21,9 @@ export function ScreenHeader({ title }: { title: string }) {
         <Text style={styles.title} accessibilityRole="header" numberOfLines={1}>
           {title}
         </Text>
-        <View style={styles.back} />
+        <View style={[styles.back, styles.menu]}>
+          <AppMenu />
+        </View>
       </View>
     </View>
   );
@@ -38,6 +42,7 @@ const styles = StyleSheet.create({
     minHeight: 56,
   },
   back: { width: 72, paddingVertical: Spacing.two },
+  menu: { alignItems: 'flex-end', paddingVertical: 0 },
   backText: { fontSize: 16, fontWeight: '600', color: Colors.navy, fontFamily: Fonts.sans },
   title: {
     flex: 1,

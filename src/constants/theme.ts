@@ -18,10 +18,16 @@ export const Colors = {
   danger: '#B42318',
 } as const;
 
+/**
+ * Script face for decorative headings (home page). Loaded in src/app/_layout.tsx from
+ * @expo-google-fonts/caveat; until it loads, headings fall back to the system font.
+ */
+const SCRIPT = 'Caveat_700Bold';
+
 export const Fonts = Platform.select({
-  ios: { sans: 'system-ui', serif: 'ui-serif' },
-  web: { sans: 'var(--font-sans)', serif: 'var(--font-serif)' },
-  default: { sans: 'normal', serif: 'serif' },
+  ios: { sans: 'system-ui', serif: 'ui-serif', script: SCRIPT },
+  web: { sans: 'var(--font-sans)', serif: 'var(--font-serif)', script: SCRIPT },
+  default: { sans: 'normal', serif: 'serif', script: SCRIPT },
 });
 
 export const Spacing = {
