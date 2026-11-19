@@ -46,7 +46,7 @@ export default function BookmarksScreen() {
 
   const open = (b: Bookmark) => {
     if (!version) return;
-    router.push(chapterHref(version, b.book, b.chapter, b.verses));
+    router.push(chapterHref(version, b.book, b.chapter, b.verses, false, 'Bookmarks'));
   };
 
   const onDelete = async (b: Bookmark) => {

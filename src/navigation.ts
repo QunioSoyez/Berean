@@ -8,7 +8,8 @@ export function goHome() {
 
 /**
  * Link to a chapter. `verses` (optional) scrolls to and briefly marks those verses;
- * `openNotes` also opens the notes panel for them.
+ * `openNotes` also opens the notes panel for them. `backLabel` (e.g. "Quiz") makes the
+ * reader show a "‹ Quiz" button that returns to the screen the link came from.
  */
 export function chapterHref(
   version: string,
@@ -16,6 +17,7 @@ export function chapterHref(
   chapter: number,
   verses?: number[],
   openNotes?: boolean,
+  backLabel?: string,
 ): Href {
   return {
     pathname: '/read/[version]/[book]/[chapter]',
@@ -25,6 +27,7 @@ export function chapterHref(
       chapter: String(chapter),
       ...(verses?.length ? { v: verses.join(',') } : {}),
       ...(verses?.length && openNotes ? { notes: '1' } : {}),
+      ...(backLabel ? { back: backLabel } : {}),
     },
   };
 }

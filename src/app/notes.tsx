@@ -77,7 +77,7 @@ export default function NotesScreen() {
   }, [all, query, tag, book]);
 
   const open = (n: Note) => {
-    if (version) router.push(chapterHref(version, n.book, n.chapter, n.verses, true));
+    if (version) router.push(chapterHref(version, n.book, n.chapter, n.verses, true, 'Notes'));
   };
 
   return (

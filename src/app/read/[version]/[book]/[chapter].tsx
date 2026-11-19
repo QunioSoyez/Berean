@@ -31,7 +31,7 @@ import { SelectionBar } from '@/components/selection-bar';
 import { Tutorial } from '@/components/tutorial';
 import { VersionPicker } from '@/components/version-picker';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
-import { chapterHref, goHome } from '@/navigation';
+import { chapterHref, goBackOrHome, goHome } from '@/navigation';
 import { shareText } from '@/share-text';
 import { saveLastPosition } from '@/state/last-position';
 import { useSettings } from '@/state/settings';
@@ -41,7 +41,18 @@ import { useChapterBookmarks } from '@/userdata/use-chapter-bookmarks';
 import { listAllTags, useChapterNotes } from '@/userdata/use-chapter-notes';
 import { useHighlights } from '@/userdata/use-highlights';
 
-type Params = { version: string; book: string; chapter: string; v?: string; notes?: string };
+type Params = {
+  version: string;
+  book: string;
+  chapter: string;
+  v?: string;
+  notes?: string;
+  /** Label of the screen that opened the reader (Quiz, Search…); shows a back button. */
+  back?: string;
+};
+
+/** Screens (by back-button label) whose passage links shouldn't change "Continue reading". */
+const SIDE_TRIP_FROM = new Set(['Quiz']);
 
 /** Screens at least this wide show the notes panel as a column beside the text. */
 const WIDE_LAYOUT = 960;
@@ -69,6 +80,7 @@ export default function ReaderScreen() {
       chapter={chapter}
       focus={focus}
       openNotes={params.notes === '1'}
+      backLabel={params.back}
     />
   );
 }
@@ -79,6 +91,7 @@ function Reader({
   chapter,
   focus,
   openNotes,
+  backLabel,
 }: {
   version: string;
   book: string;
@@ -87,6 +100,8 @@ function Reader({
   focus: number[];
   /** Open the notes panel for the focus verses (from the Notes page). */
   openNotes: boolean;
+  /** Screen that opened the reader (Quiz, Search, Bookmarks, Notes) — shows "‹ label". */
+  backLabel?: string;
 }) {
   const versionInfo = getVersion(version)!;
   const state = useChapter(version, book, chapter);
@@ -135,10 +150,14 @@ function Reader({
   const prev = prevChapter({ book, chapter });
   const next = nextChapter({ book, chapter });
 
+  // Passages opened from a game are a side trip, so they don't replace the reader's
+  // "Continue reading" spot on the home page.
+  const sideTrip = backLabel ? SIDE_TRIP_FROM.has(backLabel) : false;
+
   useEffect(() => {
-    saveLastPosition({ version, book, chapter });
+    if (!sideTrip) saveLastPosition({ version, book, chapter });
     setSelected(new Set()); // new chapter or version → start with nothing selected
-  }, [version, book, chapter]);
+  }, [version, book, chapter, sideTrip]);
 
   // Opened from a bookmark: mark those verses for a few seconds and scroll to the first.
   useEffect(() => {
@@ -324,10 +343,12 @@ function Reader({
           version: to.version ?? version,
           book: to.book ?? book,
           chapter: String(to.chapter ?? chapter),
+          // Keep the back button while paging through chapters.
+          ...(backLabel ? { back: backLabel } : {}),
         },
       });
     },
-    [version, book, chapter],
+    [version, book, chapter, backLabel],
   );
 
   // Web: left/right arrow keys move between chapters.
@@ -357,6 +378,18 @@ function Reader({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerInner}>
+          {backLabel ? (
+            <Pressable
+              onPress={goBackOrHome}
+              accessibilityRole="button"
+              accessibilityLabel={`Back to ${backLabel}`}
+              hitSlop={6}
+              style={({ pressed }) => pressed && styles.pressed}>
+              <Text style={styles.backText} numberOfLines={1}>
+                ‹ {backLabel}
+              </Text>
+            </Pressable>
+          ) : null}
           <Pressable
             onPress={goHome}
             accessibilityRole="button"
@@ -621,6 +654,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   logo: { width: 32, height: 32, borderRadius: 7 },
+  backText: { fontSize: 16, fontWeight: '600', color: Colors.navy, fontFamily: Fonts.sans, maxWidth: 110 },
   titleButton: {
     flex: 1,
     flexDirection: 'row',

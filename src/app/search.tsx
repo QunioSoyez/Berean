@@ -126,7 +126,7 @@ export default function SearchScreen() {
           renderItem={({ item }) => (
             <Pressable
               onPress={() =>
-                version && router.push(chapterHref(version, item.book, item.chapter, [item.verse]))
+                version && router.push(chapterHref(version, item.book, item.chapter, [item.verse], false, 'Search'))
               }
               accessibilityRole="button"
               accessibilityLabel={`${formatReference(item.book, item.chapter, [item.verse], version ?? undefined)}. ${item.text}`}
