@@ -52,7 +52,7 @@ type Params = {
 };
 
 /** Screens (by back-button label) whose passage links shouldn't change "Continue reading". */
-const SIDE_TRIP_FROM = new Set(['Quiz']);
+const SIDE_TRIP_FROM = new Set(['Quiz', 'Story Scramble']);
 
 /** Screens at least this wide show the notes panel as a column beside the text. */
 const WIDE_LAYOUT = 960;

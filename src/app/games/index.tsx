@@ -15,9 +15,13 @@ const GAMES: Game[] = [
     description: 'Ten questions on the people and stories of the Bible, each linked to its verse.',
     href: '/games/quiz',
   },
+  {
+    title: 'Story Scramble',
+    description: 'Put the events of a Bible story back in the order they happened.',
+    href: '/games/story-scramble',
+  },
   { title: 'Word Search', description: 'Find hidden names and places from a Bible story.' },
   { title: 'Word Scramble', description: 'Unscramble the letters to spell a Bible word.' },
-  { title: 'Story Scramble', description: 'Put the events of a Bible story back in order.' },
 ];
 
 export default function GamesScreen() {
