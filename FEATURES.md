@@ -109,13 +109,13 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] First visit: "Start reading · Select a version to start" opens the version list
 - [x] Script heading font (Caveat) for homepage and game titles
 - [x] Hamburger menu on every screen (in the shared page header), with a new Games item
-- [x] Games page: Bible Story Quiz, Story Scramble and Word Scramble playable; Word Search shown as coming soon
+- [x] Games page: Bible Story Quiz, Story Scramble, Word Scramble and Word Search all playable
 - [x] Bible Story Quiz: 114 hand-written questions (OT / NT / whole Bible), 10 per round, shuffled answers, verse reference + "Read it" link, missed-question review, best score per round (on the device)
 - [x] Reader shows "‹ Quiz / Search / Bookmarks / Notes" when opened from those screens
 - [x] Passages opened from the quiz don't change "Continue reading"
 - [x] Story Scramble: 24 stories × 6 events (OT / NT / whole Bible), 5 per round; tap events in order, check, correct order shown, "Read the story" link, best score
 - [x] Word Scramble: 85 words with a clue + verse (OT / NT / whole Bible), 10 per round; tap letter tiles, auto-check, "Show answer" after 3 wrong tries, "Read it" link, best score
-- [ ] Word Search
+- [x] Word Search: 18 story themes × 8 words, fresh 10×10 grid each time (across / down / diagonal, no backwards); drag or tap first + last letter; no timer (by choice); puzzles-completed count; puzzle in progress saved with a "Continue your puzzle" card
 
 ## Later / ideas
 - [ ] Compare versions side by side / verse by verse *(PRD — on hold)*

@@ -25,7 +25,11 @@ const GAMES: Game[] = [
     description: 'Unscramble names, places and words from the Bible, with a clue for each.',
     href: '/games/word-scramble',
   },
-  { title: 'Word Search', description: 'Find hidden names and places from a Bible story.' },
+  {
+    title: 'Word Search',
+    description: 'Find 8 hidden names, places and words from a Bible story.',
+    href: '/games/word-search',
+  },
 ];
 
 export default function GamesScreen() {
