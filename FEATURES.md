@@ -103,6 +103,20 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] EAS builds; App Store and Google Play listings
 - [x] Privacy policy page (menu → Privacy policy; https://bereanbible.live/privacy)
 
+## Round 10 — New homepage & games *(tester feedback)*
+- [x] New homepage: clouds behind a centered page; nav bar (Select Bible Version dropdown · Browse Books · Search · Bookmarks · Games); Bible-pages hero with Start/Continue reading; "What is a Berean?" (Acts 17:11), features, Play & learn, How can you help (Ko-fi, Buy Me a Coffee, Share), footer
+- [x] Phones: nav becomes a row of buttons under the logo; version list opens in place
+- [x] First visit: "Start reading · Select a version to start" opens the version list
+- [x] Script heading font (Caveat) for homepage and game titles
+- [x] Hamburger menu on every screen (in the shared page header), with a new Games item
+- [x] Games page: Bible Story Quiz playable; Word Search, Word Scramble, Story Scramble shown as coming soon
+- [x] Bible Story Quiz: 114 hand-written questions (OT / NT / whole Bible), 10 per round, shuffled answers, verse reference + "Read it" link, missed-question review, best score per round (on the device)
+- [x] Reader shows "‹ Quiz / Search / Bookmarks / Notes" when opened from those screens
+- [x] Passages opened from the quiz don't change "Continue reading"
+- [ ] Word Search
+- [ ] Word Scramble
+- [ ] Story Scramble
+
 ## Later / ideas
 - [ ] Compare versions side by side / verse by verse *(PRD — on hold)*
 - [ ] Swipe left/right to change chapter on phones
