@@ -94,11 +94,12 @@ export default function StoryScrambleScreen() {
     setNewBest(false);
   };
 
-  const puzzle = round[index];
-
+  // Look the puzzle up when the handler runs (see the note in word-scramble.tsx about the
+  // React Compiler caching handlers by what they read).
   const check = () => {
+    const { story } = round[index];
     setChecked(true);
-    if (placed.every((e, i) => e === puzzle.story.events[i])) setSolved((s) => s + 1);
+    if (placed.every((e, i) => e === story.events[i])) setSolved((s) => s + 1);
   };
 
   const next = () => {
@@ -138,7 +139,7 @@ export default function StoryScrambleScreen() {
             />
           ) : (
             <PuzzleView
-              puzzle={puzzle}
+              puzzle={round[index]}
               number={index + 1}
               total={round.length}
               solved={solved}

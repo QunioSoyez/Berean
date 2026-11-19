@@ -20,8 +20,12 @@ const GAMES: Game[] = [
     description: 'Put the events of a Bible story back in the order they happened.',
     href: '/games/story-scramble',
   },
+  {
+    title: 'Word Scramble',
+    description: 'Unscramble names, places and words from the Bible, with a clue for each.',
+    href: '/games/word-scramble',
+  },
   { title: 'Word Search', description: 'Find hidden names and places from a Bible story.' },
-  { title: 'Word Scramble', description: 'Unscramble the letters to spell a Bible word.' },
 ];
 
 export default function GamesScreen() {
