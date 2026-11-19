@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { bookName } from '@/bible/books';
 import { ScreenHeader } from '@/components/screen-header';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
+import { ContinueCard, loadProgress, saveProgress } from '@/games/progress';
 import { SCRAMBLE_WORDS, type ScrambleWord } from '@/games/word-scramble-words';
 import { chapterHref } from '@/navigation';
 import { getLastPosition } from '@/state/last-position';
@@ -16,6 +17,8 @@ const ROUND_SIZE = 10;
 /** Wrong tries before "Show answer" appears. */
 const TRIES_BEFORE_REVEAL = 3;
 const BEST_KEY = 'berean.games.wordScramble.best.v1';
+/** The round in progress (see games/progress.tsx). */
+const SAVE_KEY = 'berean.games.wordScramble.inProgress.v1';
 /** Back-button label in the reader; must match SIDE_TRIP_FROM in the reader. */
 const BACK_LABEL = 'Word Scramble';
 const TILE_GAP = 6;
@@ -32,6 +35,19 @@ type Tile = { id: number; letter: string };
 type Puzzle = { w: ScrambleWord; tiles: Tile[] };
 type Status = 'playing' | 'wrong' | 'solved' | 'revealed';
 type Best = Partial<Record<Mode, number>>;
+type Saved = {
+  mode: Mode;
+  round: Puzzle[];
+  index: number;
+  placed: number[];
+  status: Status;
+  tries: number;
+  solved: number;
+};
+
+function validSaved(s: Saved | null): Saved | null {
+  return s && Array.isArray(s.round) && s.index >= 0 && s.index < s.round.length ? s : null;
+}
 
 function shuffle<T>(items: readonly T[]): T[] {
   const a = [...items];
@@ -90,11 +106,33 @@ export default function WordScrambleScreen() {
   const [best, setBest] = useState<Best>({});
   const [newBest, setNewBest] = useState(false);
   const [version, setVersion] = useState('KJV');
+  const [saved, setSaved] = useState<Saved | null>(null);
 
   useEffect(() => {
     loadBest().then(setBest);
+    loadProgress<Saved>(SAVE_KEY).then((s) => setSaved(validSaved(s)));
     getLastPosition().then((p) => setVersion(p.version));
   }, []);
+
+  // Keep the round in progress saved; clear it once the round is finished.
+  useEffect(() => {
+    if (!mode) return;
+    const s: Saved | null = finished ? null : { mode, round, index, placed, status, tries, solved };
+    setSaved(s);
+    saveProgress(SAVE_KEY, s);
+  }, [mode, round, index, placed, status, tries, solved, finished]);
+
+  const resume = (s: Saved) => {
+    setMode(s.mode);
+    setRound(s.round);
+    setIndex(s.index);
+    setPlaced(s.placed);
+    setStatus(s.status);
+    setTries(s.tries);
+    setSolved(s.solved);
+    setFinished(false);
+    setNewBest(false);
+  };
 
   const start = (m: Mode) => {
     setMode(m);
@@ -182,7 +220,7 @@ export default function WordScrambleScreen() {
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.column}>
           {!mode ? (
-            <StartView best={best} onStart={start} />
+            <StartView best={best} saved={saved} onStart={start} onResume={resume} />
           ) : finished ? (
             <ResultsView
               solved={solved}
@@ -216,7 +254,17 @@ export default function WordScrambleScreen() {
   );
 }
 
-function StartView({ best, onStart }: { best: Best; onStart: (m: Mode) => void }) {
+function StartView({
+  best,
+  saved,
+  onStart,
+  onResume,
+}: {
+  best: Best;
+  saved: Saved | null;
+  onStart: (m: Mode) => void;
+  onResume: (s: Saved) => void;
+}) {
   return (
     <>
       <Text style={styles.title}>Word Scramble</Text>
@@ -224,7 +272,13 @@ function StartView({ best, onStart }: { best: Best; onStart: (m: Mode) => void }
         Unscramble {ROUND_SIZE} names, places and words from the Bible. Each one comes with a clue
         and the verse where it’s found.
       </Text>
-      <Text style={styles.label}>Choose a round</Text>
+      {saved && (
+        <ContinueCard
+          detail={`${MODES.find((m) => m.id === saved.mode)?.label} · word ${saved.index + 1} of ${saved.round.length} · solved ${saved.solved}`}
+          onPress={() => onResume(saved)}
+        />
+      )}
+      <Text style={styles.label}>{saved ? 'Or start a new round' : 'Choose a round'}</Text>
       {MODES.map((m) => (
         <Pressable
           key={m.id}

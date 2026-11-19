@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { bookName } from '@/bible/books';
 import { ScreenHeader } from '@/components/screen-header';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
+import { ContinueCard, loadProgress, saveProgress } from '@/games/progress';
 import { QUIZ_QUESTIONS, type QuizQuestion } from '@/games/quiz-questions';
 import { chapterHref } from '@/navigation';
 import { getLastPosition } from '@/state/last-position';
@@ -14,6 +15,8 @@ import { getLastPosition } from '@/state/last-position';
 /** Questions per round. */
 const ROUND_SIZE = 10;
 const BEST_KEY = 'berean.games.quiz.best.v1';
+/** The round in progress (see games/progress.tsx). */
+const SAVE_KEY = 'berean.games.quiz.inProgress.v1';
 
 type Mode = 'ALL' | 'OT' | 'NT';
 const MODES: { id: Mode; label: string; note: string }[] = [
@@ -24,6 +27,18 @@ const MODES: { id: Mode; label: string; note: string }[] = [
 
 type Asked = { q: QuizQuestion; options: string[] };
 type Best = Partial<Record<Mode, number>>;
+type Saved = {
+  mode: Mode;
+  round: Asked[];
+  index: number;
+  picked: string | null;
+  score: number;
+  missed: QuizQuestion[];
+};
+
+function validSaved(s: Saved | null): Saved | null {
+  return s && Array.isArray(s.round) && s.index >= 0 && s.index < s.round.length ? s : null;
+}
 
 function shuffle<T>(items: readonly T[]): T[] {
   const a = [...items];
@@ -73,11 +88,32 @@ export default function QuizScreen() {
   const [best, setBest] = useState<Best>({});
   const [newBest, setNewBest] = useState(false);
   const [version, setVersion] = useState('KJV');
+  const [saved, setSaved] = useState<Saved | null>(null);
 
   useEffect(() => {
     loadBest().then(setBest);
+    loadProgress<Saved>(SAVE_KEY).then((s) => setSaved(validSaved(s)));
     getLastPosition().then((p) => setVersion(p.version));
   }, []);
+
+  // Keep the round in progress saved; clear it once the round is finished.
+  useEffect(() => {
+    if (!mode) return;
+    const s: Saved | null = finished ? null : { mode, round, index, picked, score, missed };
+    setSaved(s);
+    saveProgress(SAVE_KEY, s);
+  }, [mode, round, index, picked, score, missed, finished]);
+
+  const resume = (s: Saved) => {
+    setMode(s.mode);
+    setRound(s.round);
+    setIndex(s.index);
+    setPicked(s.picked);
+    setScore(s.score);
+    setMissed(s.missed);
+    setFinished(false);
+    setNewBest(false);
+  };
 
   const start = (m: Mode) => {
     setMode(m);
@@ -121,7 +157,7 @@ export default function QuizScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.column}>
           {!mode ? (
-            <StartView best={best} onStart={start} />
+            <StartView best={best} saved={saved} onStart={start} onResume={resume} />
           ) : finished ? (
             <ResultsView
               score={score}
@@ -152,7 +188,17 @@ export default function QuizScreen() {
   );
 }
 
-function StartView({ best, onStart }: { best: Best; onStart: (m: Mode) => void }) {
+function StartView({
+  best,
+  saved,
+  onStart,
+  onResume,
+}: {
+  best: Best;
+  saved: Saved | null;
+  onStart: (m: Mode) => void;
+  onResume: (s: Saved) => void;
+}) {
   return (
     <>
       <Text style={styles.title}>Bible Story Quiz</Text>
@@ -160,7 +206,13 @@ function StartView({ best, onStart }: { best: Best; onStart: (m: Mode) => void }
         {ROUND_SIZE} questions on the people and stories of the Bible. After each answer you’ll see
         where to find it, so you can read the whole story.
       </Text>
-      <Text style={styles.label}>Choose a round</Text>
+      {saved && (
+        <ContinueCard
+          detail={`${MODES.find((m) => m.id === saved.mode)?.label} · question ${saved.index + 1} of ${saved.round.length} · score ${saved.score}`}
+          onPress={() => onResume(saved)}
+        />
+      )}
+      <Text style={styles.label}>{saved ? 'Or start a new round' : 'Choose a round'}</Text>
       {MODES.map((m) => (
         <Pressable
           key={m.id}

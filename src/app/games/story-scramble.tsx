@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/screen-header';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
+import { ContinueCard, loadProgress, saveProgress } from '@/games/progress';
 import { STORIES, type Story } from '@/games/story-scramble-stories';
 import { chapterHref } from '@/navigation';
 import { getLastPosition } from '@/state/last-position';
@@ -13,6 +14,8 @@ import { getLastPosition } from '@/state/last-position';
 /** Stories per round. */
 const ROUND_SIZE = 5;
 const BEST_KEY = 'berean.games.storyScramble.best.v1';
+/** The round in progress (see games/progress.tsx). */
+const SAVE_KEY = 'berean.games.storyScramble.inProgress.v1';
 /** Back-button label in the reader; must match SIDE_TRIP_FROM in the reader. */
 const BACK_LABEL = 'Story Scramble';
 
@@ -25,6 +28,18 @@ const MODES: { id: Mode; label: string; note: string }[] = [
 
 type Puzzle = { story: Story; pool: string[] };
 type Best = Partial<Record<Mode, number>>;
+type Saved = {
+  mode: Mode;
+  round: Puzzle[];
+  index: number;
+  placed: string[];
+  checked: boolean;
+  solved: number;
+};
+
+function validSaved(s: Saved | null): Saved | null {
+  return s && Array.isArray(s.round) && s.index >= 0 && s.index < s.round.length ? s : null;
+}
 
 function shuffle<T>(items: readonly T[]): T[] {
   const a = [...items];
@@ -77,11 +92,32 @@ export default function StoryScrambleScreen() {
   const [best, setBest] = useState<Best>({});
   const [newBest, setNewBest] = useState(false);
   const [version, setVersion] = useState('KJV');
+  const [saved, setSaved] = useState<Saved | null>(null);
 
   useEffect(() => {
     loadBest().then(setBest);
+    loadProgress<Saved>(SAVE_KEY).then((s) => setSaved(validSaved(s)));
     getLastPosition().then((p) => setVersion(p.version));
   }, []);
+
+  // Keep the round in progress saved; clear it once the round is finished.
+  useEffect(() => {
+    if (!mode) return;
+    const s: Saved | null = finished ? null : { mode, round, index, placed, checked, solved };
+    setSaved(s);
+    saveProgress(SAVE_KEY, s);
+  }, [mode, round, index, placed, checked, solved, finished]);
+
+  const resume = (s: Saved) => {
+    setMode(s.mode);
+    setRound(s.round);
+    setIndex(s.index);
+    setPlaced(s.placed);
+    setChecked(s.checked);
+    setSolved(s.solved);
+    setFinished(false);
+    setNewBest(false);
+  };
 
   const start = (m: Mode) => {
     setMode(m);
@@ -127,7 +163,7 @@ export default function StoryScrambleScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.column}>
           {!mode ? (
-            <StartView best={best} onStart={start} />
+            <StartView best={best} saved={saved} onStart={start} onResume={resume} />
           ) : finished ? (
             <ResultsView
               solved={solved}
@@ -160,7 +196,17 @@ export default function StoryScrambleScreen() {
   );
 }
 
-function StartView({ best, onStart }: { best: Best; onStart: (m: Mode) => void }) {
+function StartView({
+  best,
+  saved,
+  onStart,
+  onResume,
+}: {
+  best: Best;
+  saved: Saved | null;
+  onStart: (m: Mode) => void;
+  onResume: (s: Saved) => void;
+}) {
   return (
     <>
       <Text style={styles.title}>Story Scramble</Text>
@@ -168,7 +214,13 @@ function StartView({ best, onStart }: { best: Best; onStart: (m: Mode) => void }
         The events of {ROUND_SIZE} Bible stories have been mixed up. Tap them in the order they
         happened, first to last.
       </Text>
-      <Text style={styles.label}>Choose a round</Text>
+      {saved && (
+        <ContinueCard
+          detail={`${saved.round[saved.index].story.title} · story ${saved.index + 1} of ${saved.round.length} · solved ${saved.solved}`}
+          onPress={() => onResume(saved)}
+        />
+      )}
+      <Text style={styles.label}>{saved ? 'Or start a new round' : 'Choose a round'}</Text>
       {MODES.map((m) => (
         <Pressable
           key={m.id}
