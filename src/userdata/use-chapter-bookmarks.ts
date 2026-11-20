@@ -1,3 +1,4 @@
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { versesKey, type Bookmark } from './bookmark-types';
@@ -20,6 +21,13 @@ export function useChapterBookmarks(book: string, chapter: number) {
     setList([]);
     reload();
   }, [reload]);
+
+  // Reload when the reader comes back into view (e.g. after restoring a backup in Settings).
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload]),
+  );
 
   /** Every verse covered by at least one bookmark (for the little marker). */
   const bookmarkedVerses = useMemo(() => new Set(list.flatMap((b) => b.verses)), [list]);

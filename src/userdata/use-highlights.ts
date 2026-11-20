@@ -1,3 +1,4 @@
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
 import {
@@ -25,6 +26,19 @@ export function useHighlights(book: string, chapter: number) {
       cancelled = true;
     };
   }, [book, chapter]);
+
+  // Reload when the reader comes back into view (e.g. after restoring a backup in Settings).
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      getChapterHighlights(book, chapter)
+        .then((m) => !cancelled && setMap(m))
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }, [book, chapter]),
+  );
 
   const apply = useCallback(
     async (verses: number[], color: string | null) => {

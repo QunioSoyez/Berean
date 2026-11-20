@@ -127,14 +127,25 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Phone apps unchanged (SQLite; no warning shown)
 - [x] Homepage "Play & learn" text updated for all four games
 
+## Round 12 — Backup & restore (website)
+- [x] Settings → Your data: "Download a backup" saves `berean-backup-YYYY-MM-DD.json` — highlights, bookmarks, notes, text size (no game progress, no Bible text; verses by USFM book/chapter/verse so the phone apps can use the same file later)
+- [x] "Restore from a backup": file is fully checked first (app/format, books, chapters, verses, colors, tags, sizes) — a bad file shows a clear error and saves nothing
+- [x] Shows what's in the file before restoring (counts + date), then "Added … · skipped N already here"
+- [x] Restore only adds: bookmarks skipped if already here (same id or same verses), notes skipped if same id, highlights only fill verses that aren't highlighted (existing colors kept); text size set from the backup; "seen" flags only turned on
+- [x] "Download a backup" link in the website data notice (Bookmarks, Notes) and the first-save popup; help page explains backups and links to Settings; "There's no backup yet" wording removed
+- [x] Reader reloads highlights, bookmarks and notes when you come back to it (restored data shows right away)
+- [x] Small Berean logo (→ home) beside the hamburger menu on every secondary screen
+- [x] Phone apps unchanged (no backup buttons)
+
 ## Later / ideas
 - [ ] Compare versions side by side / verse by verse *(PRD — on hold)*
 - [ ] Swipe left/right to change chapter on phones
 - [ ] Screen reader + keyboard pass on all screens *(PRD)*
+  - [ ] Reader: the note marker is a button inside the verse-row button ("<button> cannot contain a nested <button>" dev warning on web) — move it beside the row
 - [ ] Save NTBT study notes on the phone for offline reading (see Round 7)
 - [ ] More public-domain versions (Darby, BBE, Webster, Geneva 1599…)
 - [ ] Optional download-on-demand for versions to keep the app small
-- [ ] Export / import notes (backup) — next step after Round 11's website data warning: download highlights, bookmarks, notes (and settings/game progress) as a file and restore it
+- [ ] Backup & restore in the phone apps (same file format as the website — Round 12); maybe game progress too
 - [ ] Optional cloud sync (accounts) — out of MVP scope
 
 ## Known data notes

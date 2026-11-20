@@ -1,3 +1,4 @@
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { Note, NoteInput } from './note-types';
@@ -27,6 +28,13 @@ export function useChapterNotes(book: string, chapter: number) {
     setList([]);
     reload();
   }, [reload]);
+
+  // Reload when the reader comes back into view (e.g. after restoring a backup in Settings).
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload]),
+  );
 
   /** verse → number of notes attached to it (for the note marker). */
   const counts = useMemo(() => {

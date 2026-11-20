@@ -1,11 +1,11 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
-import { goBackOrHome } from '@/navigation';
+import { goBackOrHome, goHome } from '@/navigation';
 
 import { AppMenu } from './app-menu';
 
-/** Header for secondary screens: back button, title, and the hamburger menu. */
+/** Header for secondary screens: back button, title, the logo (→ home) and the hamburger menu. */
 export function ScreenHeader({ title }: { title: string }) {
   return (
     <View style={styles.header}>
@@ -22,6 +22,14 @@ export function ScreenHeader({ title }: { title: string }) {
           {title}
         </Text>
         <View style={[styles.back, styles.menu]}>
+          <Pressable
+            onPress={goHome}
+            accessibilityRole="button"
+            accessibilityLabel="Home"
+            hitSlop={6}
+            style={({ pressed }) => pressed && styles.pressed}>
+            <Image source={require('@/assets/images/logo-mark.png')} style={styles.logo} />
+          </Pressable>
           <AppMenu />
         </View>
       </View>
@@ -41,8 +49,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     minHeight: 56,
   },
-  back: { width: 72, paddingVertical: Spacing.two },
-  menu: { alignItems: 'flex-end', paddingVertical: 0 },
+  // Both sides the same width so the title stays centered.
+  back: { width: 96, paddingVertical: Spacing.two },
+  menu: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: Spacing.two,
+    paddingVertical: 0,
+  },
+  logo: { width: 28, height: 28, borderRadius: 6 },
   backText: { fontSize: 16, fontWeight: '600', color: Colors.navy, fontFamily: Fonts.sans },
   title: {
     flex: 1,

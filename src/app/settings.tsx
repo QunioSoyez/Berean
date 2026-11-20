@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BackupControls } from '@/components/backup-controls';
 import { Heading, InfoPage, Para } from '@/components/info-page';
 import { Tutorial } from '@/components/tutorial';
 import { WebDataNotice } from '@/components/web-data-notice';
@@ -61,7 +62,10 @@ export default function SettingsScreen() {
 
       <Heading>Your data</Heading>
       {Platform.OS === 'web' ? (
-        <WebDataNotice inline />
+        <>
+          <WebDataNotice inline backupLink={false} />
+          <BackupControls />
+        </>
       ) : (
         <Para small>
           Your highlights, bookmarks, notes and game progress are saved in the app on this device.

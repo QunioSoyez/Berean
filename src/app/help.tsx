@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, type ReactNode } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -53,7 +53,7 @@ export default function HelpScreen() {
       <ScreenHeader title="How to use Berean" />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         <View style={styles.column}>
-          <WebDataNotice helpLink={false} inline />
+          <WebDataNotice helpLink={false} backupLink={false} inline />
           <Para>
             A quick guide to everything in Berean. Tap a topic to jump to it.
           </Para>
@@ -221,8 +221,22 @@ export default function HelpScreen() {
                 <Para>
                   That means clearing your browser’s history or browsing data (cookies and site
                   data) will erase them, and so will using a private or incognito window. They also
-                  don’t move between browsers or devices. There’s no backup yet, so if your notes
-                  matter to you, keep that in mind before clearing your browser.
+                  don’t move between browsers or devices.
+                </Para>
+                <Para>
+                  <B>Keep a backup.</B> In <B>Settings → Your data</B>, tap <B>Download a backup</B>{' '}
+                  to save a small file with your highlights, bookmarks, notes and text size (game
+                  progress isn’t included). Keep it somewhere safe, like your Documents folder or
+                  cloud storage, and download a new one now and then.{' '}
+                  <Text style={styles.link} onPress={() => router.push('/settings')} accessibilityRole="link">
+                    Go to Settings
+                  </Text>
+                </Para>
+                <Para>
+                  To get them back (after clearing your browser, or in another browser), tap{' '}
+                  <B>Restore from a backup</B> and choose the file. Berean shows what’s in it before
+                  anything is saved. Restoring only adds what’s missing: nothing already in this
+                  browser is deleted or changed, so it’s safe to restore the same file twice.
                 </Para>
               </>
             ) : (
@@ -262,6 +276,7 @@ function B({ children }: { children: ReactNode }) {
 }
 
 const styles = StyleSheet.create({
+  link: { fontWeight: '600', color: Colors.navy, textDecorationLine: 'underline' },
   safe: { flex: 1, backgroundColor: Colors.background },
   scroll: { paddingBottom: Spacing.six },
   column: {

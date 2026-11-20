@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { DownloadBackupLink } from '@/components/backup-controls';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 
 type Props = {
@@ -27,7 +28,10 @@ export function FirstSaveNotice({ visible, onClose }: Props) {
           <Text style={styles.body}>
             Your highlights, bookmarks and notes are kept in this browser, on this device only.
             Clearing your browsing data, or using a private or incognito window, will erase them.
-            There’s no backup yet, so keep that in mind before clearing your browser.
+            To keep them safe, download a backup now and then (also in Settings → Your data).
+          </Text>
+          <Text style={styles.body}>
+            <DownloadBackupLink style={styles.link} />
           </Text>
           <View style={styles.buttons}>
             <Pressable
@@ -85,6 +89,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif,
   },
   body: { fontSize: 16, lineHeight: 24, color: Colors.text, fontFamily: Fonts.sans },
+  link: { fontWeight: '600', color: Colors.navy, textDecorationLine: 'underline', marginTop: Spacing.two },
   buttons: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
