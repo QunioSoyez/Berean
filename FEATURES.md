@@ -87,8 +87,9 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Privacy policy written for Mission CTRL (local-only data, non-personalized website ads, donations)
 - [x] About & credits privacy wording updated
 - [x] Ad spots ready on Home, Search, Bookmarks, Notes — website only, never in the reader, labeled "Advertisement"
-- [ ] Apply for Google AdSense with bereanbible.live
-- [ ] After approval: publisher ID + ad slot in src/ads/config.ts, ads.txt in public/
+- [x] Applied for Google AdSense with bereanbible.live (in review)
+- [x] Site verification: `google-adsense-account` meta tag in public/index.html (loads no ad script) + public/ads.txt; publisher ID in src/ads/config.ts
+- [ ] After approval: create a Display ad unit and put its slot number in `AD_SLOT` (src/ads/config.ts) — ads turn on then; keep Auto ads OFF
 - [ ] In AdSense: block sensitive categories; turn on the EEA/UK consent message
 
 ## Round 8 — Settings, tutorial & polish
