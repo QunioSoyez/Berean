@@ -25,6 +25,7 @@ import { BookmarkDialog } from '@/components/bookmark-dialog';
 import { BookPicker } from '@/components/book-picker';
 import { ChapterText } from '@/components/chapter-text';
 import { CommentaryView } from '@/components/commentary-view';
+import { FirstSaveNotice } from '@/components/first-save-notice';
 import { NtbtStudyView } from '@/components/ntbt-study-view';
 import { NotesPanel, type PanelTab } from '@/components/notes-panel';
 import { SelectionBar } from '@/components/selection-bar';
@@ -125,6 +126,11 @@ function Reader({
   // First-run tutorial (also available from Settings).
   const settings = useSettings();
   const showTutorial = settings.loaded && !settings.tutorialSeen;
+  // Website: after the first bookmark or note, explain once that it's saved in this browser only.
+  const [dataNoticeOpen, setDataNoticeOpen] = useState(false);
+  const afterFirstSave = () => {
+    if (Platform.OS === 'web' && settings.loaded && !settings.dataNoticeSeen) setDataNoticeOpen(true);
+  };
 
   // Scrolling to a bookmarked verse: remember where the text and each verse row sit.
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -284,6 +290,7 @@ function Reader({
       const title = label ?? defaultBookmarkLabel(book, chapter, selectedVerses, version);
       clearSelection();
       flash(existingBookmark ? 'Bookmark updated' : `Bookmarked: ${title}`);
+      if (!existingBookmark) afterFirstSave();
     }
   };
   const onRemoveBookmark = async () => {
@@ -531,7 +538,11 @@ function Reader({
           knownTags={knownTags}
           startComposing={notesPanel.compose}
           onClose={() => setNotesPanel(null)}
-          onAdd={async (input) => afterNoteChange(await nt.add(notesPanel.verses, input))}
+          onAdd={async (input) => {
+            const ok = await afterNoteChange(await nt.add(notesPanel.verses, input));
+            if (ok) afterFirstSave();
+            return ok;
+          }}
           onEdit={async (id, input) => afterNoteChange(await nt.edit(id, input))}
           onDelete={async (id) => afterNoteChange(await nt.remove(id))}
         />
@@ -563,6 +574,13 @@ function Reader({
       )}
 
       <Tutorial visible={showTutorial} onClose={() => settings.setTutorialSeen(true)} />
+      <FirstSaveNotice
+        visible={dataNoticeOpen}
+        onClose={() => {
+          setDataNoticeOpen(false);
+          settings.setDataNoticeSeen(true);
+        }}
+      />
 
       <BookmarkDialog
         visible={bookmarkDialogOpen}

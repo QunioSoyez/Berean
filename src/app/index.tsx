@@ -282,10 +282,16 @@ export default function Home() {
               <Body muted>
                 Everything stays on your device. No account, no tracking.
               </Body>
+              <View style={styles.buttonRow}>
+                <OutlineButton label="How to use Berean" onPress={() => router.push('/help')} />
+              </View>
             </Section>
 
             <Section title="Play & learn">
-              <Body>Test what you know with a Bible story quiz. More games are coming soon.</Body>
+              <Body>
+                Test what you know with four Bible games: a story quiz, Story Scramble, Word Scramble
+                and Word Search.
+              </Body>
               <View style={styles.buttonRow}>
                 <OutlineButton label="Play games" onPress={() => router.push('/games')} />
               </View>
@@ -321,6 +327,10 @@ export default function Home() {
               <Text style={styles.footerText}> · </Text>
               <Text style={styles.footerLink} onPress={() => router.push('/about')}>
                 About
+              </Text>
+              <Text style={styles.footerText}> · </Text>
+              <Text style={styles.footerLink} onPress={() => router.push('/help')}>
+                Help
               </Text>
               <Text style={styles.footerText}> · </Text>
               <Text style={styles.footerLink} onPress={() => router.push('/privacy')}>

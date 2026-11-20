@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Heading, InfoPage, Para } from '@/components/info-page';
 import { Tutorial } from '@/components/tutorial';
+import { WebDataNotice } from '@/components/web-data-notice';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { TEXT_SIZES, useFontScale, useSettings } from '@/state/settings';
 
@@ -57,6 +58,16 @@ export default function SettingsScreen() {
         style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
         <Text style={styles.buttonText}>Show the tutorial again</Text>
       </Pressable>
+
+      <Heading>Your data</Heading>
+      {Platform.OS === 'web' ? (
+        <WebDataNotice inline />
+      ) : (
+        <Para small>
+          Your highlights, bookmarks, notes and game progress are saved in the app on this device.
+          They stay until you delete them or uninstall Berean.
+        </Para>
+      )}
 
       {settings.saveFailed && (
         <Text style={styles.warning} accessibilityRole="alert">

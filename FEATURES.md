@@ -119,6 +119,14 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Word Scramble: 85 words with a clue + verse (OT / NT / whole Bible), 10 per round; tap letter tiles, auto-check, "Show answer" after 3 wrong tries, "Read it" link, best score
 - [x] Word Search: 18 story themes × 8 words, fresh 10×10 grid each time (across / down / diagonal, no backwards); drag or tap first + last letter; no timer (by choice); puzzles-completed count; puzzle in progress saved with a "Continue your puzzle" card
 
+## Round 11 — Help & website data warning *(tester feedback)*
+- [x] "How to use Berean" help page (`/help`): reading, selecting verses, highlighting, bookmarks, notes (formatting, tags, Notes page), commentary, search, games, where your data is saved; topic links at the top jump to each section (`/help?section=bookmarks` opens at that topic)
+- [x] Help linked from the menu, the homepage (button + footer), the empty Bookmarks/Notes screens and the last tutorial card ("More help")
+- [x] Website only: "Saved in this browser only" notice on Bookmarks, Notes, the help page and Settings → Your data — clearing browsing data or a private/incognito window erases highlights, bookmarks and notes
+- [x] Website only: one-time notice after your first new bookmark or note ("Got it" / "Learn more"); comes back if browser data is cleared
+- [x] Phone apps unchanged (SQLite; no warning shown)
+- [x] Homepage "Play & learn" text updated for all four games
+
 ## Later / ideas
 - [ ] Compare versions side by side / verse by verse *(PRD — on hold)*
 - [ ] Swipe left/right to change chapter on phones
@@ -126,7 +134,7 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [ ] Save NTBT study notes on the phone for offline reading (see Round 7)
 - [ ] More public-domain versions (Darby, BBE, Webster, Geneva 1599…)
 - [ ] Optional download-on-demand for versions to keep the app small
-- [ ] Export / import notes (backup)
+- [ ] Export / import notes (backup) — next step after Round 11's website data warning: download highlights, bookmarks, notes (and settings/game progress) as a file and restore it
 - [ ] Optional cloud sync (accounts) — out of MVP scope
 
 ## Known data notes

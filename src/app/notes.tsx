@@ -17,6 +17,7 @@ import { formatReference } from '@/bible/reference';
 import { AdBanner } from '@/components/ad-banner';
 import { ScreenHeader } from '@/components/screen-header';
 import { TagChip } from '@/components/tag-chip';
+import { WebDataNotice } from '@/components/web-data-notice';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { chapterHref } from '@/navigation';
 import { getLastPosition } from '@/state/last-position';
@@ -83,6 +84,7 @@ export default function NotesScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <ScreenHeader title="Notes" />
+      <WebDataNotice />
       {error && <Text style={styles.error}>{error}</Text>}
 
       {notes === null ? (
@@ -93,6 +95,13 @@ export default function NotesScreen() {
           <Text style={styles.emptyText}>
             While reading, tap a verse (or several), then tap Note in the bar at the bottom.
           </Text>
+          <Pressable
+            onPress={() => router.push({ pathname: '/help', params: { section: 'notes' } })}
+            accessibilityRole="link"
+            hitSlop={6}
+            style={({ pressed }) => [styles.emptyLink, pressed && styles.pressed]}>
+            <Text style={styles.emptyLinkText}>How notes work ›</Text>
+          </Pressable>
         </View>
       ) : (
         <FlatList
@@ -217,6 +226,8 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     fontFamily: Fonts.sans,
   },
+  emptyLink: { marginTop: Spacing.three, paddingVertical: Spacing.one },
+  emptyLinkText: { fontSize: 15, fontWeight: '600', color: Colors.navy, fontFamily: Fonts.sans },
   list: { width: '100%', maxWidth: MaxReadingWidth, alignSelf: 'center', paddingBottom: Spacing.six },
   filters: { padding: Spacing.three, gap: Spacing.three },
   search: {

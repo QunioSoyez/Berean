@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -46,7 +47,17 @@ export function Tutorial({ visible, onClose }: Props) {
 
           <View style={styles.buttons}>
             {last ? (
-              <View />
+              <Pressable
+                onPress={() => {
+                  onClose();
+                  router.push('/help');
+                }}
+                accessibilityRole="link"
+                accessibilityLabel="More help: How to use Berean"
+                hitSlop={8}
+                style={({ pressed }) => [styles.skip, pressed && styles.pressed]}>
+                <Text style={styles.moreHelpText}>More help</Text>
+              </Pressable>
             ) : (
               <Pressable
                 onPress={onClose}
@@ -221,6 +232,7 @@ const styles = StyleSheet.create({
   },
   right: { flexDirection: 'row', gap: Spacing.two },
   skip: { paddingVertical: Spacing.two, paddingRight: Spacing.two },
+  moreHelpText: { fontSize: 15, color: Colors.navy, fontWeight: '600', fontFamily: Fonts.sans },
   skipText: { fontSize: 15, color: Colors.textSecondary, fontWeight: '600', fontFamily: Fonts.sans },
   secondary: {
     paddingVertical: 10,

@@ -14,10 +14,15 @@ export const TEXT_SIZES: { id: TextSize; label: string; scale: number }[] = [
   { id: 'xlarge', label: 'Extra large', scale: 1.32 },
 ];
 
-type Settings = { textSize: TextSize; tutorialSeen: boolean };
+type Settings = {
+  textSize: TextSize;
+  tutorialSeen: boolean;
+  /** Website: the one-time "saved in this browser only" notice has been seen. */
+  dataNoticeSeen: boolean;
+};
 
 const KEY = 'berean.settings.v1';
-const DEFAULTS: Settings = { textSize: 'medium', tutorialSeen: false };
+const DEFAULTS: Settings = { textSize: 'medium', tutorialSeen: false, dataNoticeSeen: false };
 
 type ContextValue = Settings & {
   /** False until saved settings have been read (avoids flashing the tutorial). */
@@ -26,6 +31,7 @@ type ContextValue = Settings & {
   saveFailed: boolean;
   setTextSize: (size: TextSize) => void;
   setTutorialSeen: (seen: boolean) => void;
+  setDataNoticeSeen: (seen: boolean) => void;
 };
 
 const SettingsContext = createContext<ContextValue | null>(null);
@@ -43,6 +49,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setSettings({
           textSize: TEXT_SIZES.some((s) => s.id === saved.textSize) ? saved.textSize! : DEFAULTS.textSize,
           tutorialSeen: saved.tutorialSeen === true,
+          dataNoticeSeen: saved.dataNoticeSeen === true,
         });
       })
       .catch(() => {}) // unreadable → defaults
@@ -66,6 +73,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       saveFailed,
       setTextSize: (textSize) => update({ textSize }),
       setTutorialSeen: (tutorialSeen) => update({ tutorialSeen }),
+      setDataNoticeSeen: (dataNoticeSeen) => update({ dataNoticeSeen }),
     }),
     [settings, loaded, saveFailed, update],
   );

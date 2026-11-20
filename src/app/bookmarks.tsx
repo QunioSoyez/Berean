@@ -9,6 +9,7 @@ import { getVersion } from '@/bible/versions';
 import { BookmarkDialog } from '@/components/bookmark-dialog';
 import { AdBanner } from '@/components/ad-banner';
 import { ScreenHeader } from '@/components/screen-header';
+import { WebDataNotice } from '@/components/web-data-notice';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 import { chapterHref } from '@/navigation';
 import { getLastPosition } from '@/state/last-position';
@@ -75,6 +76,7 @@ export default function BookmarksScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <ScreenHeader title="Bookmarks" />
+      <WebDataNotice />
       {error && <Text style={styles.error}>{error}</Text>}
 
       {items === null ? (
@@ -85,6 +87,13 @@ export default function BookmarksScreen() {
           <Text style={styles.emptyText}>
             While reading, tap a verse (or several), then tap Bookmark in the bar at the bottom.
           </Text>
+          <Pressable
+            onPress={() => router.push({ pathname: '/help', params: { section: 'bookmarks' } })}
+            accessibilityRole="link"
+            hitSlop={6}
+            style={({ pressed }) => [styles.emptyLink, pressed && styles.pressed]}>
+            <Text style={styles.emptyLinkText}>How bookmarks work ›</Text>
+          </Pressable>
         </View>
       ) : (
         <FlatList
@@ -255,6 +264,8 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     fontFamily: Fonts.sans,
   },
+  emptyLink: { marginTop: Spacing.three, paddingVertical: Spacing.one },
+  emptyLinkText: { fontSize: 15, fontWeight: '600', color: Colors.navy, fontFamily: Fonts.sans },
   list: {
     width: '100%',
     maxWidth: MaxReadingWidth,
