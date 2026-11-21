@@ -5,6 +5,19 @@
   // Must match the Worker's name in the Cloudflare dashboard.
   "name": "berean",
   "compatibility_date": "2026-09-01",
+  // Small server script for the guestbook (worker/index.ts). It only runs for the paths listed
+  // in assets.run_worker_first below; every other request is served straight from dist/.
+  "main": "worker/index.ts",
+  // Guestbook database (D1). The ID is not a secret.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "berean-guestbook",
+      "database_id": "0533f804-0acd-48f5-847b-e1c669c491f7"
+    }
+  ],
+  // The Turnstile secret is NOT here: it's a Worker secret named TURNSTILE_SECRET,
+  // set in the dashboard (Workers & Pages > berean > Settings > Variables and Secrets).
   // Serve the app on our own domain. The bereanbible.live zone must be active in this
   // Cloudflare account first; deploy then creates the DNS record and certificate itself.
   // (www.bereanbible.live redirects here via a Redirect Rule in the dashboard.)
@@ -16,6 +29,10 @@
     "directory": "./dist/",
     // The app handles its own pages (e.g. /read/KJV/JHN/3), so any path that isn't a real
     // file gets index.html instead of a 404.
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // Lets worker/index.ts hand requests back to the static site.
+    "binding": "ASSETS",
+    // Only these paths go to worker/index.ts. /admin is also locked by Cloudflare Access.
+    "run_worker_first": ["/api/*", "/admin", "/admin/*"]
   }
 }
