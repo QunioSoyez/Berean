@@ -10,4 +10,11 @@ export const DONATE_LINKS = [
 ] as const;
 
 /** Date shown at the top of the privacy policy — update it whenever the policy changes. */
-export const PRIVACY_UPDATED = 'November 6, 2026';
+export const PRIVACY_UPDATED = 'November 20, 2026';
+
+/**
+ * Guestbook (website only). The Turnstile *site* key is public; the secret lives only in the
+ * Worker (TURNSTILE_SECRET). Limits must match worker/index.ts.
+ */
+export const TURNSTILE_SITE_KEY = '0x4AAAAAAGLMGXzlGxCOUe4_';
+export const GUESTBOOK_LIMITS = { name: 40, city: 60, note: 200 } as const;

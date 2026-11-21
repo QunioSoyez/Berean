@@ -1,6 +1,6 @@
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -38,6 +38,8 @@ export function AppMenu({ onChangeVersion }: Props) {
     { label: 'Bookmarks', onPress: nav('/bookmarks') },
     { label: 'Notes', onPress: nav('/notes') },
     { label: 'Games', onPress: nav('/games') },
+    // The guestbook is website-only for now.
+    ...(Platform.OS === 'web' ? [{ label: 'Guestbook', onPress: nav('/guestbook') }] : []),
     { label: 'How to use Berean', onPress: nav('/help') },
     { label: 'Settings', onPress: nav('/settings') },
     { label: 'Support Berean', onPress: nav('/support') },

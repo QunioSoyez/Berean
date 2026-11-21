@@ -67,6 +67,24 @@ export default function PrivacyScreen() {
         <Link url="https://adssettings.google.com">adssettings.google.com</Link>.
       </Para>
 
+      <Heading>Guestbook (website only)</Heading>
+      <Para>
+        If you sign the guestbook, we store the name, city and note you enter, plus the time you
+        signed. Entries are reviewed before they appear, and approved entries are shown publicly on
+        the guestbook page. Please don’t include anything you wouldn’t want to be public. To have
+        your entry removed, email us.
+      </Para>
+      <Para>
+        To block spam, the form uses Cloudflare Turnstile, a bot check that doesn’t use tracking or
+        advertising cookies (see{' '}
+        <Link url="https://www.cloudflare.com/turnstile-privacy-policy/">
+          Cloudflare’s Turnstile privacy addendum
+        </Link>
+        ). We also limit how many times a day someone can sign by keeping a scrambled (hashed) form of
+        your IP address. We never store the actual address, and the scrambled record is deleted
+        after one day.
+      </Para>
+
       <Heading>Donations</Heading>
       <Para>
         If you choose to support Berean through Ko-fi or Buy Me a Coffee, that happens on their
@@ -82,8 +100,9 @@ export default function PrivacyScreen() {
 
       <Heading>Children</Heading>
       <Para>
-        Berean doesn’t knowingly collect personal information from anyone, including children under
-        13.
+        Apart from what someone chooses to write in the guestbook, Berean doesn’t collect personal
+        information from anyone. The guestbook is not meant for children under 13. If we learn that a
+        child under 13 has signed it, we’ll delete the entry.
       </Para>
 
       <Heading>Changes</Heading>
