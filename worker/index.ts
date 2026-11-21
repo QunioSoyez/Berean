@@ -135,7 +135,7 @@ async function submitEntry(request: Request, env: Env): Promise<Response> {
 
   // Daily limit per visitor. The IP is hashed with the secret as salt, so real IPs are never stored.
   const day = new Date().toISOString().slice(0, 10);
-  const ipHash = await sha256(`${env.TURNSTILE_SECRET}:${ip}`);
+  const ipHash = await sha256(`${(env.TURNSTILE_SECRET ?? '').trim()}:${ip}`);
   await env.DB.prepare('DELETE FROM rate_limits WHERE day < ?').bind(day).run();
   const row = await env.DB.prepare('SELECT count FROM rate_limits WHERE ip_hash = ? AND day = ?')
     .bind(ipHash, day)
@@ -161,15 +161,30 @@ async function submitEntry(request: Request, env: Env): Promise<Response> {
 
 async function verifyTurnstile(token: string, ip: string, env: Env): Promise<boolean> {
   const form = new FormData();
-  form.append('secret', env.TURNSTILE_SECRET);
+  // .trim() guards against a stray space or newline pasted in with the secret.
+  form.append('secret', (env.TURNSTILE_SECRET ?? '').trim());
   form.append('response', token);
   if (ip) form.append('remoteip', ip);
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
     body: form,
   });
-  const data = (await res.json()) as { success?: boolean; hostname?: string };
-  return data.success === true && data.hostname === 'bereanbible.live';
+  const data = (await res.json()) as {
+    success?: boolean;
+    hostname?: string;
+    'error-codes'?: string[];
+  };
+  const ok = data.success === true && data.hostname === 'bereanbible.live';
+  if (!ok) {
+    // Shows in the Worker's logs (dashboard > berean > Logs), never to visitors.
+    console.error('Turnstile failed', {
+      success: data.success,
+      hostname: data.hostname,
+      errors: data['error-codes'],
+      secretLength: (env.TURNSTILE_SECRET ?? '').length,
+    });
+  }
+  return ok;
 }
 
 // ---------- Admin (behind Cloudflare Access) ----------

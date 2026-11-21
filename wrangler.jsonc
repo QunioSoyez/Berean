@@ -24,6 +24,8 @@
   "routes": [{ "pattern": "bereanbible.live", "custom_domain": true }],
   // Turn off the old berean.michaelbarnes0.workers.dev address.
   "workers_dev": false,
+  // Keep the Worker's logs (dashboard > berean > Observability/Logs) for troubleshooting the guestbook.
+  "observability": { "enabled": true },
   "preview_urls": false,
   "assets": {
     "directory": "./dist/",
