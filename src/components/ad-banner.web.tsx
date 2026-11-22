@@ -1,34 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, type HostInstance } from 'react-native';
 
-import { AD_SLOT, ADSENSE_CLIENT, adsEnabled, NON_PERSONALIZED } from '@/ads/config';
+import { adsEnabled, CAN_AD_UNIT, CAN_SCRIPT_SRC } from '@/ads/config';
 import { Colors, Fonts, MaxReadingWidth, Spacing } from '@/constants/theme';
 
-type AdsQueue = Record<string, unknown>[] & { requestNonPersonalizedAds?: number };
-declare global {
-  interface Window {
-    adsbygoogle?: AdsQueue;
-  }
-}
-
-let scriptAdded = false;
-
-/** Loads the AdSense script once, the first time an ad is shown. */
-function ensureScript() {
-  if (scriptAdded || typeof document === 'undefined') return;
-  scriptAdded = true;
-  const queue: AdsQueue = (window.adsbygoogle = window.adsbygoogle || []);
-  if (NON_PERSONALIZED) queue.requestNonPersonalizedAds = 1;
-  const s = document.createElement('script');
-  s.async = true;
-  s.crossOrigin = 'anonymous';
-  s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
-  document.head.appendChild(s);
-}
-
 /**
- * A responsive Google ad, labeled "Advertisement" so it's never mistaken for app content.
- * Renders nothing until src/ads/config.ts is filled in.
+ * A Christian Ad Network ad, labeled "Advertisement" so it's never mistaken for app content.
+ * Builds their site tag (the <ins> block + script) inside this spot. The script is added again
+ * each time a spot appears, because the site changes pages without reloading.
+ * Renders nothing if CAN_AD_UNIT in src/ads/config.ts is empty.
  */
 export function AdBanner() {
   const hostRef = useRef<HostInstance>(null);
@@ -38,20 +18,14 @@ export function AdBanner() {
     if (!enabled) return;
     const host = hostRef.current as unknown as HTMLElement | null;
     if (!host) return;
-    ensureScript();
     const ins = document.createElement('ins');
-    ins.className = 'adsbygoogle';
+    ins.className = 'CANBMDDisplayAD';
+    ins.setAttribute('data-bmd-ad-unit', CAN_AD_UNIT);
     ins.style.display = 'block';
-    ins.setAttribute('data-ad-client', ADSENSE_CLIENT);
-    ins.setAttribute('data-ad-slot', AD_SLOT);
-    ins.setAttribute('data-ad-format', 'auto');
-    ins.setAttribute('data-full-width-responsive', 'true');
     host.appendChild(ins);
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      // Ad blockers or a failed load: just leave the space empty.
-    }
+    const script = document.createElement('script');
+    script.src = CAN_SCRIPT_SRC;
+    host.appendChild(script); // ad blockers or a failed load: the space just stays empty
     return () => {
       host.innerHTML = '';
     };

@@ -87,10 +87,11 @@ Legend: `[x]` done · `[ ]` to do · *(PRD)* = from the PRD · *(added)* = decid
 - [x] Privacy policy written for Mission CTRL (local-only data, non-personalized website ads, donations)
 - [x] About & credits privacy wording updated
 - [x] Ad spots ready on Home, Search, Bookmarks, Notes — website only, never in the reader, labeled "Advertisement"
-- [x] Applied for Google AdSense with bereanbible.live (in review)
-- [x] Site verification: `google-adsense-account` meta tag in public/index.html (loads no ad script) + public/ads.txt; publisher ID in src/ads/config.ts
-- [ ] After approval: create a Display ad unit and put its slot number in `AD_SLOT` (src/ads/config.ts) — ads turn on then; keep Auto ads OFF
-- [ ] In AdSense: block sensitive categories; turn on the EEA/UK consent message
+- [x] ~~Google AdSense~~ — dropped 2026-11-21 (site removed from AdSense; meta tag and AdSense code removed)
+- [x] Switched to Christian Ad Network (CleanMedia) — they vet ads up front. Site tag built in the ad spot (src/components/ad-banner.web.tsx, ad unit in src/ads/config.ts); their ads.txt in public/ads.txt
+- [x] Privacy policy and About page updated for Christian Ad Network (general cookie wording)
+- [ ] Ad placement: settle with the Christian Ad Network account manager
+- [ ] Confirm with Christian Ad Network: cookies/personalization and EEA/UK consent — adjust privacy wording if needed
 
 ## Round 8 — Settings, tutorial & polish
 - [x] Settings screen (in the menu) — saved on each device

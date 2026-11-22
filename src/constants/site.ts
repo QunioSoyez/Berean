@@ -10,7 +10,7 @@ export const DONATE_LINKS = [
 ] as const;
 
 /** Date shown at the top of the privacy policy — update it whenever the policy changes. */
-export const PRIVACY_UPDATED = 'November 20, 2026';
+export const PRIVACY_UPDATED = 'November 21, 2026';
 
 /**
  * Guestbook (website only). The Turnstile *site* key is public; the secret lives only in the

@@ -68,7 +68,7 @@ export default function GamesScreen() {
             );
           })}
         </View>
-        {/* Website only; renders nothing in the phone apps or until AdSense is set up. */}
+        {/* Website only; renders nothing in the phone apps or if ads are switched off. */}
         <AdBanner />
       </ScrollView>
     </SafeAreaView>

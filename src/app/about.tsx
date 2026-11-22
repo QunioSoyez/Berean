@@ -51,7 +51,7 @@ export default function AboutScreen() {
       <Heading>Your privacy</Heading>
       <Para>
         No account and no analytics. Your highlights, bookmarks and notes stay on this device. The
-        website shows non-personalized Google ads to help with costs; the phone apps have no ads.{' '}
+        website shows ads from Christian Ad Network to help with costs; the phone apps have no ads.{' '}
         <Text style={styles.link} onPress={() => router.push('/privacy')} accessibilityRole="link">
           Read the privacy policy
         </Text>

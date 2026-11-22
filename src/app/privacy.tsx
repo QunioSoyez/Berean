@@ -12,7 +12,7 @@ function Link({ url, children }: { url: string; children: string }) {
   );
 }
 
-/** Privacy policy (required by Google AdSense for the website, and good practice for the apps). */
+/** Privacy policy (expected by ad networks for the website, and good practice for the apps). */
 export default function PrivacyScreen() {
   return (
     <InfoPage title="Privacy policy">
@@ -21,7 +21,7 @@ export default function PrivacyScreen() {
         Berean is a Bible study app and website ({SITE_URL.replace('https://', '')}) run by{' '}
         {PUBLISHER}. This policy explains what happens to information when you use it. In short: we
         don’t have accounts, we don’t collect your personal study data, and the website shows
-        non-personalized ads to help cover its costs.
+        ads to help cover its costs.
       </Para>
 
       <Heading>Your highlights, bookmarks and notes</Heading>
@@ -50,21 +50,16 @@ export default function PrivacyScreen() {
 
       <Heading>Advertising (website only)</Heading>
       <Para>
-        The Berean website may show ads provided by Google AdSense. The phone apps do not show ads.
-        Ads appear only on pages such as Home, Search, Bookmarks and Notes — never alongside the Bible
-        text or study notes — and are labeled “Advertisement”.
+        The Berean website shows ads provided by Christian Ad Network, which reviews the ads it
+        serves so they are appropriate for a Christian audience. The phone apps do not show ads. Ads
+        appear only on pages such as Home, Search, Bookmarks, Notes and Games — never alongside the
+        Bible text or study notes — and are labeled “Advertisement”.
       </Para>
       <Para>
-        We request non-personalized ads only, which means ads are not based on your interests or
-        browsing history. Google may still use cookies or similar technologies to show ads, limit how
-        often you see the same ad, measure ads in aggregate and prevent fraud. Visitors in the
-        European Economic Area, the UK and Switzerland are asked for consent where required. You can
-        learn more in{' '}
-        <Link url="https://policies.google.com/technologies/partner-sites">
-          How Google uses information from sites that use its services
-        </Link>{' '}
-        and manage Google ad settings at{' '}
-        <Link url="https://adssettings.google.com">adssettings.google.com</Link>.
+        The ad network and its advertising partners may use cookies or similar technologies to show
+        ads, limit how often you see the same ad, measure ads and prevent fraud. We don’t share your
+        highlights, bookmarks, notes or other study data with them — that data never leaves your
+        device. You can block or clear cookies in your browser settings.
       </Para>
 
       <Heading>Guestbook (website only)</Heading>
